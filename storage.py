@@ -26,17 +26,17 @@ class Storage:
             "total_restarts": 0,
             "last_restart_reason": None,
             "last_restart_time": None,
-            "web_username": "admin",
-            "web_password": "admin",
+            "web_username": "ash",
+            "web_password": "root",
             "created_at": datetime.now().isoformat()
         }
         self._load()
         
         # Ensure web credentials are set
         if "web_username" not in self.state:
-            self.state["web_username"] = "admin"
+            self.state["web_username"] = "ash"
         if "web_password" not in self.state:
-            self.state["web_password"] = "admin"
+            self.state["web_password"] = "root"
             self._save()
         
     def _get_encryption_key(self) -> bytes:
