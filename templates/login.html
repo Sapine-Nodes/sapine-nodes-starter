@@ -2,39 +2,57 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - GitHub VM Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0e1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Login - Sapine Nodes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #1e293b;
-            --text-primary: #f1f5f9;
+            /* Nebula-inspired dark theme colors */
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.8);
+            --bg-card-solid: #111827;
+            --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --accent-primary: #3b82f6;
+            --text-muted: #64748b;
+            --accent-primary: #6366f1;
             --accent-secondary: #8b5cf6;
-            --border-color: #334155;
+            --accent-tertiary: #06b6d4;
+            --border-color: rgba(99, 102, 241, 0.2);
+            --border-glow: rgba(99, 102, 241, 0.4);
             --success: #10b981;
             --error: #ef4444;
-            --shadow: rgba(0, 0, 0, 0.5);
+            --warning: #f59e0b;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --glass-bg: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
         
         [data-theme="light"] {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #f1f5f9;
-            --bg-card: #ffffff;
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-card-solid: #ffffff;
             --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --accent-primary: #3b82f6;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --accent-primary: #6366f1;
             --accent-secondary: #8b5cf6;
-            --border-color: #e2e8f0;
+            --accent-tertiary: #06b6d4;
+            --border-color: rgba(99, 102, 241, 0.15);
+            --border-glow: rgba(99, 102, 241, 0.3);
             --success: #10b981;
             --error: #ef4444;
-            --shadow: rgba(0, 0, 0, 0.1);
+            --warning: #f59e0b;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
         }
         
         * {
@@ -44,56 +62,159 @@
             -webkit-tap-highlight-color: transparent;
         }
         
+        html {
+            scroll-behavior: smooth;
+        }
+        
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
             position: relative;
+            overflow: hidden;
         }
         
-        body::before {
+        /* Animated gradient background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .background-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+                        radial-gradient(ellipse at 40% 60%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+            animation: nebulaPulse 15s ease-in-out infinite;
+        }
+        
+        .background-animation::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-            opacity: 0.1;
-            pointer-events: none;
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(99, 102, 241, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 70% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 25%);
+            animation: nebulaFloat 20s ease-in-out infinite reverse;
         }
         
-        .login-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px var(--shadow);
-            padding: 40px;
+        @keyframes nebulaPulse {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+            33% { transform: translate(-5%, 5%) scale(1.05); opacity: 0.9; }
+            66% { transform: translate(5%, -5%) scale(0.95); opacity: 1; }
+        }
+        
+        @keyframes nebulaFloat {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(3%, -3%); }
+        }
+        
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 420px;
-            animation: slideUp 0.5s ease;
-            position: relative;
+            height: 100%;
+            pointer-events: none;
             z-index: 1;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         
-        @keyframes slideUp {
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .particle:nth-child(2) { left: 20%; animation-delay: -2s; animation-duration: 12s; }
+        .particle:nth-child(3) { left: 40%; animation-delay: -4s; animation-duration: 10s; }
+        .particle:nth-child(4) { left: 60%; animation-delay: -1s; animation-duration: 14s; }
+        .particle:nth-child(5) { left: 80%; animation-delay: -3s; animation-duration: 11s; }
+        .particle:nth-child(6) { left: 10%; animation-delay: -5s; animation-duration: 9s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.4; }
+            50% { transform: translateY(50vh) scale(1); opacity: 0.3; }
+            90% { opacity: 0.4; }
+        }
+        
+        /* Login Container with Glassmorphism */
+        .login-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 50px -12px var(--shadow-color),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+                0 0 80px rgba(99, 102, 241, 0.1);
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 440px;
+            animation: containerSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 10;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+            border-radius: 24px 24px 0 0;
+            opacity: 0.9;
+        }
+        
+        .login-container:hover {
+            box-shadow: 
+                0 30px 60px -15px var(--shadow-color),
+                0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+                0 0 100px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        @keyframes containerSlideUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px) scale(0.96);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
         
+        /* Theme Toggle */
         .theme-toggle {
             position: absolute;
             top: 20px;
@@ -101,82 +222,126 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 50px;
-            padding: 8px 12px;
+            padding: 10px 14px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             align-items: center;
             gap: 8px;
+            z-index: 20;
         }
         
         .theme-toggle:hover {
             background: var(--accent-primary);
             border-color: var(--accent-primary);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .theme-toggle:active {
+            transform: scale(0.95);
         }
         
         .theme-toggle i {
             font-size: 16px;
             color: var(--text-primary);
-            transition: transform 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
         .theme-toggle:hover i {
             transform: rotate(180deg);
+            color: white;
         }
         
+        /* Logo Section */
         .logo {
             text-align: center;
-            margin-bottom: 35px;
+            margin-bottom: 40px;
         }
         
         .logo-icon {
-            font-size: 48px;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 15px;
-            animation: pulse 2s ease-in-out infinite;
+            border-radius: 20px;
+            font-size: 36px;
+            color: white;
+            animation: logoFloat 3s ease-in-out infinite;
+            box-shadow: 
+                0 15px 35px rgba(99, 102, 241, 0.3),
+                0 0 0 8px rgba(99, 102, 241, 0.1);
+            position: relative;
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            opacity: 0.2;
+            z-index: -1;
+            animation: logoGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        @keyframes logoGlow {
+            from { opacity: 0.15; transform: scale(1); }
+            to { opacity: 0.3; transform: scale(1.1); }
         }
         
         .logo h1 {
             font-size: 32px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 50%, var(--accent-secondary) 100%);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             letter-spacing: -0.5px;
+            animation: shimmer 3s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
         }
         
         .logo p {
             color: var(--text-secondary);
             font-size: 15px;
-            font-weight: 400;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
         
+        /* Form Styles */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         
         .form-group label {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 12px;
             color: var(--text-primary);
-            font-weight: 500;
+            font-weight: 600;
             font-size: 14px;
+            letter-spacing: 0.3px;
         }
         
         .form-group label i {
             color: var(--accent-primary);
+            font-size: 14px;
         }
         
         .input-wrapper {
@@ -185,54 +350,66 @@
         
         .input-icon {
             position: absolute;
-            left: 15px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-secondary);
-            transition: color 0.3s ease;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            font-size: 16px;
         }
         
         .form-group input {
             width: 100%;
-            padding: 14px 15px 14px 45px;
+            padding: 16px 18px 16px 50px;
             border: 2px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 15px;
             font-family: 'Inter', sans-serif;
+            font-weight: 500;
             background: var(--bg-secondary);
             color: var(--text-primary);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .form-group input::placeholder {
+            color: var(--text-muted);
         }
         
         .form-group input:focus {
             outline: none;
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-            background: var(--bg-card);
+            box-shadow: 
+                0 0 0 4px rgba(99, 102, 241, 0.15),
+                0 8px 25px rgba(99, 102, 241, 0.15);
+            background: var(--bg-card-solid);
         }
         
-        .form-group input:focus + .input-icon {
+        .form-group input:focus ~ .input-icon,
+        .form-group input:not(:placeholder-shown) ~ .input-icon {
             color: var(--accent-primary);
         }
         
+        /* Submit Button */
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 16px 24px;
             background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             position: relative;
             overflow: hidden;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
         }
         
         .btn::before {
@@ -242,8 +419,8 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            transition: left 0.6s ease;
         }
         
         .btn:hover::before {
@@ -251,83 +428,215 @@
         }
         
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.45);
         }
         
         .btn:active {
-            transform: translateY(0);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
         }
         
         .btn:disabled {
-            opacity: 0.6;
+            opacity: 0.7;
             cursor: not-allowed;
+            transform: none;
         }
         
+        .btn i {
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn:hover i {
+            transform: translateX(3px);
+        }
+        
+        /* Error Message */
         .error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--error);
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             color: var(--error);
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 16px;
+            border-radius: 14px;
+            margin-bottom: 24px;
             font-size: 14px;
+            font-weight: 500;
             display: none;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            backdrop-filter: blur(10px);
         }
         
         .error.show {
             display: flex;
-            animation: shake 0.5s;
+            animation: shakeError 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
         }
         
         .error i {
             font-size: 18px;
+            flex-shrink: 0;
         }
         
-        @keyframes shake {
+        @keyframes shakeError {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+            20%, 40%, 60%, 80% { transform: translateX(6px); }
         }
         
+        /* Footer */
         .footer {
             text-align: center;
-            margin-top: 25px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--glass-border);
             color: var(--text-secondary);
             font-size: 13px;
-            line-height: 1.6;
+            line-height: 1.8;
+        }
+        
+        .footer p {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 6px;
         }
         
         .footer i {
             color: var(--accent-primary);
-            margin-right: 5px;
+            font-size: 14px;
         }
         
+        .footer code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-secondary);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--accent-tertiary);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Mobile Responsiveness */
         @media (max-width: 480px) {
+            body {
+                padding: 16px;
+                align-items: flex-start;
+                padding-top: 10vh;
+            }
+            
             .login-container {
-                padding: 30px 20px;
+                padding: 36px 24px;
+                border-radius: 20px;
+            }
+            
+            .logo-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 32px;
+                border-radius: 18px;
             }
             
             .logo h1 {
-                font-size: 24px;
+                font-size: 26px;
+            }
+            
+            .logo p {
+                font-size: 14px;
+            }
+            
+            .form-group input {
+                padding: 14px 16px 14px 46px;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            .btn {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+            
+            .theme-toggle {
+                top: 16px;
+                right: 16px;
+                padding: 8px 12px;
+            }
+            
+            .footer {
+                font-size: 12px;
+            }
+            
+            .footer p {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .login-container {
+                padding: 28px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 22px;
+            }
+        }
+        
+        /* Touch feedback for mobile */
+        @media (hover: none) {
+            .btn:hover {
+                transform: none;
+                box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+            }
+            
+            .btn:active {
+                transform: scale(0.98);
+            }
+            
+            .theme-toggle:hover {
+                transform: none;
+            }
+            
+            .theme-toggle:active {
+                transform: scale(0.9);
+            }
+        }
+        
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="background-animation"></div>
+    
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <!-- Theme Toggle (Outside container for better mobile UX) -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle dark/light theme">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+    
     <div class="login-container">
-        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
-            <i class="fas fa-moon" id="themeIcon"></i>
-        </button>
-        
         <div class="logo">
             <div class="logo-icon">
-                <i class="fas fa-server"></i>
+                <i class="fas fa-rocket"></i>
             </div>
-            <h1>VM Manager</h1>
-            <p>GitHub Actions VM Control Panel</p>
+            <h1>Sapine Nodes</h1>
+            <p>Cloud VM Control Panel</p>
         </div>
         
         <div id="error" class="error"></div>
@@ -335,35 +644,35 @@
         <form id="loginForm">
             <div class="form-group">
                 <label for="username">
-                    <i class="fas fa-user"></i>
+                    <i class="fas fa-user-astronaut"></i>
                     Username
                 </label>
                 <div class="input-wrapper">
-                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter username">
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter your username">
                     <i class="fas fa-user input-icon"></i>
                 </div>
             </div>
             
             <div class="form-group">
                 <label for="password">
-                    <i class="fas fa-lock"></i>
+                    <i class="fas fa-shield-halved"></i>
                     Password
                 </label>
                 <div class="input-wrapper">
-                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter password">
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
                     <i class="fas fa-lock input-icon"></i>
                 </div>
             </div>
             
             <button type="submit" class="btn">
-                <i class="fas fa-sign-in-alt"></i>
-                Login
+                <span>Sign In</span>
+                <i class="fas fa-arrow-right"></i>
             </button>
         </form>
         
         <div class="footer">
-            <p><i class="fas fa-info-circle"></i> Default credentials: ash / root</p>
-            <p><i class="fas fa-terminal"></i> Change via Telegram: /menu → Settings → Web Credentials</p>
+            <p><i class="fas fa-key"></i> Default: <code>ash</code> / <code>root</code></p>
+            <p><i class="fas fa-robot"></i> Configure via Telegram Bot</p>
         </div>
     </div>
     
@@ -398,8 +707,11 @@
             e.preventDefault();
             
             const btn = form.querySelector('.btn');
+            const btnSpan = btn.querySelector('span');
+            const btnIcon = btn.querySelector('i');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            btnSpan.textContent = 'Signing in...';
+            btnIcon.className = 'fas fa-spinner fa-spin';
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -417,25 +729,35 @@
                 
                 if (data.success) {
                     localStorage.setItem('token', data.token);
-                    btn.innerHTML = '<i class="fas fa-check"></i> Success!';
+                    btnSpan.textContent = 'Success!';
+                    btnIcon.className = 'fas fa-check';
+                    btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
                     setTimeout(() => {
                         window.location.href = '/dashboard';
-                    }, 500);
+                    }, 600);
                 } else {
                     showError(data.error || 'Login failed');
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                    btnSpan.textContent = 'Sign In';
+                    btnIcon.className = 'fas fa-arrow-right';
                 }
             } catch (error) {
                 showError('Connection error. Please try again.');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                btnSpan.textContent = 'Sign In';
+                btnIcon.className = 'fas fa-arrow-right';
             }
         });
         
         function showError(message) {
             errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
             errorDiv.classList.add('show');
+            
+            // Add haptic feedback on mobile if supported
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 30, 50]);
+            }
+            
             setTimeout(() => {
                 errorDiv.classList.remove('show');
             }, 4000);
@@ -443,6 +765,11 @@
         
         // Initialize on load
         initTheme();
+        
+        // Focus username field on load (desktop only)
+        if (window.innerWidth > 768) {
+            document.getElementById('username').focus();
+        }
     </script>
 </body>
 </html>
