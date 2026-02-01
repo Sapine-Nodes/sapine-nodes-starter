@@ -26,9 +26,18 @@ class Storage:
             "total_restarts": 0,
             "last_restart_reason": None,
             "last_restart_time": None,
+            "web_username": "admin",
+            "web_password": "admin",
             "created_at": datetime.now().isoformat()
         }
         self._load()
+        
+        # Ensure web credentials are set
+        if "web_username" not in self.state:
+            self.state["web_username"] = "admin"
+        if "web_password" not in self.state:
+            self.state["web_password"] = "admin"
+            self._save()
         
     def _get_encryption_key(self) -> bytes:
         """Generate encryption key from environment or fixed salt"""

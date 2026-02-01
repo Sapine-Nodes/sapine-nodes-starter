@@ -1,11 +1,12 @@
 # GitHub Actions VM Manager
 
-A 24/7 Python-based system that manages GitHub Actions workflows as disposable Linux VMs with full control via Telegram Bot.
+A 24/7 Python-based system that manages GitHub Actions workflows as disposable Linux VMs with full control via Telegram Bot and Web Dashboard.
 
 ## 🎯 Purpose
 
 This system runs continuously on Render.com and provides:
 - **Telegram Bot** as the primary control panel
+- **Web Dashboard** with beautiful responsive UI
 - **FastAPI** as the backend brain
 - **GitHub Actions** as disposable worker VMs
 - **SSHX** for remote SSH access to VMs
@@ -20,6 +21,18 @@ This system runs continuously on Render.com and provides:
 - 🔗 **SSH Access** - Get SSHX URLs for remote access
 - 📜 **History** - View past SSHX sessions and workflow runs
 - ⚙️ **Settings** - View and manage system settings
+- 🌐 **Web Credentials** - Configure web dashboard login
+- 📚 **Help Command** - `/help` for comprehensive documentation
+
+### Web Dashboard 🆕
+- 🎨 **Beautiful UI** - Modern, gradient design with smooth animations
+- 📱 **Fully Responsive** - Works perfectly on mobile, tablet, and desktop
+- 🔐 **Secure Authentication** - JWT-based login system
+- 📊 **Real-time Status** - Live system monitoring with auto-refresh
+- 🔗 **SSHX Access** - Click-to-open SSHX URLs
+- ⚡ **Quick Actions** - Start/Stop/Restart workflows with one click
+- 📜 **History View** - Browse past SSHX sessions
+- 🔄 **Auto-refresh** - Dashboard updates every 30 seconds
 
 ### Automatic Monitoring
 - Runs every 60 seconds
@@ -30,9 +43,11 @@ This system runs continuously on Render.com and provides:
 
 ### Security
 - Encrypted GitHub token storage
+- JWT-based web authentication
 - No secrets in code
 - Private chat enforcement for tokens
 - Token validation before storage
+- Configurable web credentials
 
 ## 🚀 Quick Start
 
@@ -56,8 +71,10 @@ This system runs continuously on Render.com and provides:
 3. Copy the bot token provided
 4. Send `/setcommands` to BotFather and set:
    ```
-   start - Start the bot
+   start - Start the bot and show main menu
    menu - Show main menu
+   help - Show help and documentation
+   status - Quick status check
    ```
 
 ### 3. Deploy to Render.com
@@ -91,7 +108,47 @@ This system runs continuously on Render.com and provides:
 6. Click **🔧 Push Workflow** to upload the workflow file
 7. Click **🧠 Workflow** → **▶️ Start Workflow** to start your first VM!
 
+### 5. Access Web Dashboard
+
+1. Open your Render.com deployment URL in browser
+2. Login with default credentials:
+   - Username: `admin`
+   - Password: `admin`
+3. Change credentials via bot: **⚙️ Settings** → **🌐 Web Credentials**
+
+## 🌐 Web Dashboard
+
+### Features
+- **Real-time Monitoring** - Live status updates every 30 seconds
+- **Beautiful UI** - Modern gradient design with smooth animations
+- **Mobile Responsive** - Perfect on all device sizes
+- **Quick Actions** - Control workflows with one click
+- **SSHX Access** - Direct links to remote VMs
+- **History View** - Browse past sessions
+
+### Default Credentials
+- Username: `admin`
+- Password: `admin`
+
+⚠️ **Change default credentials immediately via Telegram bot!**
+
+### How to Change Web Credentials
+
+Via Telegram Bot:
+1. Go to **⚙️ Settings**
+2. Click **🌐 Web Credentials**
+3. Click **🔐 Change Credentials**
+4. Send new credentials in format: `username password`
+
+Example: `myuser mypassword123`
+
 ## 📱 Bot Interface
+
+### Bot Commands
+- `/start` - Start the bot and show main menu
+- `/menu` - Show main menu at any time
+- `/help` - Show comprehensive help documentation
+- `/status` - Quick status check
 
 ### Main Menu
 - **🟢 Status** - Current system status and SSHX URL
@@ -157,20 +214,29 @@ Bot Trigger → GitHub Actions Start → SSHX Install
 - **GitHub tokens** are encrypted using Fernet encryption
 - **Encryption key** is derived from environment salt
 - **Bot tokens** are environment variables only
+- **Web authentication** uses JWT tokens
 - **No secrets** committed to code
 - **Token messages** are deleted immediately in Telegram
+- **Web credentials** configurable via bot
+- **Default credentials** should be changed immediately
 
 ## 📂 Project Structure
 
 ```
 .
-├── main.py              # FastAPI app + background monitor
+├── main.py              # FastAPI app + background monitor + web routes
 ├── bot.py               # Telegram bot UI and handlers
 ├── github.py            # GitHub API wrapper
 ├── storage.py           # Persistent state management
 ├── sshx.py              # SSHX URL extraction
+├── templates/           # Web dashboard HTML templates
+│   ├── login.html       # Login page
+│   └── dashboard.html   # Main dashboard
+├── static/              # Static assets (CSS, JS, images)
+│   └── styles.css       # Additional styles
 ├── workflows/           # Workflow YAML files
 │   └── vm-worker.yml    # Main VM worker workflow
+├── HELP.md              # Comprehensive help documentation
 ├── requirements.txt     # Python dependencies
 ├── render.yaml          # Render.com deployment config
 ├── .gitignore          # Git ignore patterns
@@ -192,9 +258,11 @@ Bot Trigger → GitHub Actions Start → SSHX Install
 
 ## 📊 API Endpoints
 
-The system exposes a minimal REST API:
+The system exposes REST API endpoints:
 
-### GET /health
+### Public Endpoints
+
+#### GET /health
 Health check endpoint
 ```json
 {
@@ -203,8 +271,8 @@ Health check endpoint
 }
 ```
 
-### GET /status
-System status
+#### GET /status
+System status (public access)
 ```json
 {
   "account": "username",
@@ -216,11 +284,75 @@ System status
 }
 ```
 
-### POST /restart
-Manually restart workflow
+### Authenticated Endpoints (Require JWT Token)
+
+#### POST /api/login
+Login and get JWT token
+```json
+Request:
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+Response:
+{
+  "success": true,
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+```
+
+#### GET /api/status
+Get system status (authenticated)
+Requires: `Authorization: Bearer {token}` header
+
+#### GET /api/history
+Get SSHX history (authenticated)
 ```json
 {
+  "sshx_urls": [
+    {
+      "url": "https://sshx.io/s/xxxxx",
+      "timestamp": "2024-01-01T12:00:00"
+    }
+  ]
+}
+```
+
+#### POST /api/workflow/start
+Start workflow (authenticated)
+```json
+Response:
+{
+  "success": true,
+  "run_id": 12345,
+  "message": "Workflow started successfully"
+}
+```
+
+#### POST /api/workflow/stop
+Stop workflow (authenticated)
+```json
+Response:
+{
+  "success": true,
+  "message": "Stopped 1 workflow(s)"
+}
+```
+
+#### POST /restart
+Manually restart workflow
+```json
+Request:
+{
   "reason": "Manual restart via API"
+}
+
+Response:
+{
+  "success": true,
+  "run_id": 12345,
+  "message": "Workflow restarted successfully"
 }
 ```
 
@@ -246,6 +378,18 @@ Manually restart workflow
 - Upgrade to paid plan for true 24/7 operation
 - Check logs for errors causing crashes
 
+### Web Dashboard not loading
+- Verify service is running on Render
+- Check if `templates/` and `static/` directories exist
+- Try clearing browser cache
+- Check browser console for errors
+
+### Cannot login to Web Dashboard
+- Use default credentials: `admin` / `admin`
+- Check credentials via bot: **⚙️ Settings** → **🌐 Web Credentials**
+- Try resetting credentials via bot
+- Check JWT_SECRET_KEY environment variable (optional)
+
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -255,6 +399,7 @@ Manually restart workflow
 | `TELEGRAM_BOT_TOKEN` | Yes | Your Telegram bot token from BotFather |
 | `PORT` | No | Server port (default: 8000) |
 | `ENCRYPTION_SALT` | No | Custom encryption salt for tokens |
+| `JWT_SECRET_KEY` | No | Secret key for JWT tokens (auto-generated if not set) |
 
 ### State File
 
@@ -264,6 +409,7 @@ State is persisted in `state.json` (gitignored) with:
 - Workflow IDs
 - SSHX URL history
 - Uptime & restart counters
+- Web dashboard credentials
 
 ## 📝 Customizing the Workflow
 
