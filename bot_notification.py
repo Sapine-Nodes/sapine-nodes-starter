@@ -18,7 +18,6 @@ class TelegramBot:
         self.token = token
         self.storage = storage
         self.app = Application.builder().token(token).build()
-        self.authorized_users = set()  # Can be extended with admin list
         self._setup_handlers()
     
     def _setup_handlers(self):

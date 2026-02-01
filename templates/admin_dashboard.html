@@ -897,8 +897,13 @@
             // Show selected section
             document.getElementById(sectionId).classList.add('active');
             
-            // Set active nav item
-            event.target.closest('.nav-item').classList.add('active');
+            // Set active nav item - find by checking onclick attribute
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const onclickAttr = item.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(`'${sectionId}'`)) {
+                    item.classList.add('active');
+                }
+            });
             
             // Update page title
             const titles = {
@@ -1540,7 +1545,38 @@
             const activeSection = document.querySelector('.section.active');
             if (activeSection) {
                 const sectionId = activeSection.id;
-                showSection(sectionId);
+                // Reload data for current section without changing navigation
+                loadSectionData(sectionId);
+            }
+        }
+        
+        function loadSectionData(sectionId) {
+            // Load data for a specific section
+            switch(sectionId) {
+                case 'overview':
+                    loadOverview();
+                    break;
+                case 'workflows':
+                    loadWorkflowRuns();
+                    break;
+                case 'github':
+                    loadGitHubAccounts();
+                    break;
+                case 'repositories':
+                    loadRepositories();
+                    break;
+                case 'workflow-files':
+                    loadWorkflowFiles();
+                    break;
+                case 'ssh':
+                    loadSSHInfo();
+                    break;
+                case 'history':
+                    loadHistory();
+                    break;
+                case 'settings':
+                    loadSettings();
+                    break;
             }
         }
         

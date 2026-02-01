@@ -889,7 +889,9 @@ async def api_update_credentials(request: UpdateCredentialsRequest, user: dict =
     current_username = storage.state.get("web_username", "ash")
     current_password = storage.state.get("web_password", "root")
     
-    # Verify current password
+    # TODO: Implement password hashing with bcrypt for production use
+    # Currently using plain text passwords for simplicity
+    # Verify current password using constant-time comparison to prevent timing attacks
     if not hmac.compare_digest(request.current_password, current_password):
         return {
             "success": False,
