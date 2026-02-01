@@ -5,15 +5,26 @@ Manages GitHub Actions workflows as disposable VMs.
 import asyncio
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import uvicorn
-from datetime import datetime
+from datetime import datetime, timedelta
+import jwt
+import hashlib
 
 from storage import Storage
 from github import GitHubAPI
 from bot import TelegramBot
 from sshx import extract_sshx_url
+
+
+# JWT Configuration
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 
 
 # Global state
@@ -22,8 +33,51 @@ bot = None
 monitor_task = None
 
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
 class RestartRequest(BaseModel):
     reason: str = "Manual restart via API"
+
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    """Create JWT access token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+def verify_token(token: str):
+    """Verify JWT token"""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.JWTError:
+        return None
+
+
+async def get_current_user(request: Request):
+    """Dependency to get current user from token"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    token = auth_header.split(" ")[1]
+    payload = verify_token(token)
+    
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
+    return payload
 
 
 async def background_monitor():
@@ -199,19 +253,56 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="GitHub Actions VM Manager",
     description="Manage GitHub Actions workflows as disposable Linux VMs",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan
 )
 
+# Mount static files and templates
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
-@app.get("/")
+
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    """Root endpoint"""
-    return {
-        "name": "GitHub Actions VM Manager",
-        "version": "1.0.0",
-        "status": "running"
-    }
+    """Root endpoint - redirect to login"""
+    return RedirectResponse(url="/login")
+
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Login page"""
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page(request: Request):
+    """Dashboard page"""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+
+@app.post("/api/login")
+async def login(request: LoginRequest):
+    """Login endpoint"""
+    # Get credentials from storage
+    web_username = storage.state.get("web_username", "admin")
+    web_password = storage.state.get("web_password", "admin")
+    
+    # Verify credentials
+    if request.username == web_username and request.password == web_password:
+        # Create access token
+        access_token = create_access_token(
+            data={"sub": request.username},
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+        return {
+            "success": True,
+            "token": access_token
+        }
+    else:
+        return {
+            "success": False,
+            "error": "Invalid username or password"
+        }
 
 
 @app.get("/health")
@@ -223,9 +314,9 @@ async def health():
     }
 
 
-@app.get("/status")
-async def status():
-    """Get system status"""
+@app.get("/api/status")
+async def api_status(user: dict = Depends(get_current_user)):
+    """Get system status (authenticated)"""
     return {
         "account": storage.get_active_account(),
         "repository": storage.get_active_repo(),
@@ -234,6 +325,100 @@ async def status():
         "restart_info": storage.get_restart_info(),
         "last_run_id": storage.get_last_run_id()
     }
+
+
+@app.get("/status")
+async def status():
+    """Get system status (public)"""
+    return {
+        "account": storage.get_active_account(),
+        "repository": storage.get_active_repo(),
+        "sshx_url": storage.get_current_sshx_url(),
+        "uptime_seconds": storage.get_uptime(),
+        "restart_info": storage.get_restart_info(),
+        "last_run_id": storage.get_last_run_id()
+    }
+
+
+@app.get("/api/history")
+async def api_history(user: dict = Depends(get_current_user)):
+    """Get SSHX history (authenticated)"""
+    return {
+        "sshx_urls": storage.get_sshx_history()
+    }
+
+
+@app.post("/api/workflow/start")
+async def api_workflow_start(user: dict = Depends(get_current_user)):
+    """Start workflow (authenticated)"""
+    token = storage.get_active_token()
+    repo = storage.get_active_repo()
+    
+    if not token or not repo:
+        return {
+            "success": False,
+            "error": "GitHub token or repository not configured"
+        }
+    
+    try:
+        github = GitHubAPI(token)
+        success, run_id = await github.trigger_workflow(repo)
+        
+        if success:
+            if run_id:
+                storage.set_last_run_id(run_id)
+            
+            return {
+                "success": True,
+                "run_id": run_id,
+                "message": "Workflow started successfully"
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Failed to trigger workflow"
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+@app.post("/api/workflow/stop")
+async def api_workflow_stop(user: dict = Depends(get_current_user)):
+    """Stop workflow (authenticated)"""
+    token = storage.get_active_token()
+    repo = storage.get_active_repo()
+    
+    if not token or not repo:
+        return {
+            "success": False,
+            "error": "GitHub token or repository not configured"
+        }
+    
+    try:
+        github = GitHubAPI(token)
+        active_runs = await github.get_active_runs(repo)
+        
+        if active_runs:
+            for run in active_runs:
+                await github.cancel_workflow_run(repo, run['id'])
+            
+            return {
+                "success": True,
+                "message": f"Stopped {len(active_runs)} workflow(s)"
+            }
+        else:
+            return {
+                "success": True,
+                "message": "No active workflows to stop"
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 
 @app.post("/restart")
