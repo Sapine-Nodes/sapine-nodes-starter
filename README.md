@@ -1,12 +1,13 @@
 # GitHub Actions VM Manager
 
-A 24/7 Python-based system that manages GitHub Actions workflows as disposable Linux VMs with full control via Telegram Bot and Web Dashboard.
+A 24/7 Python-based system that manages GitHub Actions workflows as disposable Linux VMs with full control via Telegram Bot and **Enhanced Web Dashboard**.
 
 ## 🎯 Purpose
 
 This system runs continuously on Render.com and provides:
 - **Telegram Bot** as the primary control panel
-- **Web Dashboard** with beautiful responsive UI
+- **🆕 Enhanced Web Dashboard** with 50+ features, modern UI, and user management
+- **Classic Web Dashboard** with beautiful responsive UI (still available)
 - **FastAPI** as the backend brain
 - **GitHub Actions** as disposable worker VMs
 - **SSHX** for remote SSH access to VMs
@@ -25,6 +26,24 @@ This system runs continuously on Render.com and provides:
 - 📚 **Help Command** - `/help` for comprehensive documentation
 
 ### Web Dashboard 🆕
+
+#### Enhanced Dashboard (NEW - Version 2.0)
+- 🎨 **Modern UI** - Completely redesigned with gradient themes and premium fonts
+- 📱 **Fully Responsive** - Hamburger menu, collapsible sidebar, works on all devices
+- 🔐 **User Management** - Multi-user support with role-based access (Owner: ash)
+- 👤 **Profile System** - Avatar upload, profile customization
+- 📊 **50+ Features** - Comprehensive management interface
+- 🎯 **Quick Actions** - One-click workflow controls
+- 🔔 **Notifications** - Real-time notification center
+- ⌨️ **Command Palette** - Quick access with Ctrl+K
+- 🔍 **Global Search** - Search across all sections
+- 📈 **Analytics** - Performance and usage metrics
+- 🛠️ **Advanced Tools** - API management, webhooks, secrets, templates
+- 👥 **Team Features** - User permissions, activity logs, collaboration tools
+
+Access at: `/enhanced-dashboard` (default)
+
+#### Classic Dashboard (Original)
 - 🎨 **Beautiful UI** - Modern, gradient design with smooth animations
 - 📱 **Fully Responsive** - Works perfectly on mobile, tablet, and desktop
 - 🔐 **Secure Authentication** - JWT-based login system
@@ -33,6 +52,8 @@ This system runs continuously on Render.com and provides:
 - ⚡ **Quick Actions** - Start/Stop/Restart workflows with one click
 - 📜 **History View** - Browse past SSHX sessions
 - 🔄 **Auto-refresh** - Dashboard updates every 30 seconds
+
+Access at: `/classic-dashboard`
 
 ### Automatic Monitoring
 - Runs every 60 seconds

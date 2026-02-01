@@ -1,0 +1,71 @@
+# Screenshots Information
+
+Due to limitations in the automated screenshot process, here are descriptions of the pages that have been created:
+
+## 1. Login Page (http://localhost:8765/login)
+- Modern login interface with dark/light theme toggle
+- Username and password fields with icons
+- Gradient branding
+- Shows default credentials: ash / root
+- Animated elements with smooth transitions
+- Fully responsive design
+
+## 2. Enhanced Dashboard (http://localhost:8765/enhanced-dashboard)
+- **Sidebar Navigation** with hamburger menu:
+  - Dashboard sections (Overview, Analytics)
+  - VM Management (Workflows, SSH Access, Resources, Logs)
+  - GitHub (Accounts, Repositories, Actions)
+  - Configuration (Templates, Secrets, Webhooks, Integrations)
+  - Users (Manage Users, Permissions, Activity Log)
+  - Advanced (API, Backup, Settings)
+
+- **Top Bar**:
+  - Search functionality
+  - Notification center with badge count
+  - Theme toggle
+  - Command palette (Ctrl+K)
+  - Logout button
+
+- **Overview Section**:
+  - 4 Stats cards showing:
+    * Active Workflows
+    * SSH Sessions  
+    * Uptime
+    * Total Restarts
+  - System Status card with real-time data
+  - Quick Actions (Start, Stop, Restart Workflow, Open Terminal)
+
+- **User Profile Modal**:
+  - Avatar upload with preview
+  - Username, role, email fields
+  - Display name customization
+  - Save button
+
+## 3. Classic Dashboard (http://localhost:8765/classic-dashboard)
+- Original dashboard design maintained for backward compatibility
+- Simple card-based layout
+- Real-time status updates
+- Quick workflow actions
+
+## Key Visual Features:
+- **Colors**: Purple-blue gradient primary theme
+- **Fonts**: Poppins for body, Montserrat for headings, Roboto Mono for code
+- **Animations**: Smooth hover effects, transitions, and loading states
+- **Icons**: Font Awesome 6.5.1 throughout
+- **Responsive**: Mobile-first design with collapsible sidebar
+
+## Screenshots to be taken in production:
+1. login-page-dark.png - Login page in dark mode
+2. login-page-light.png - Login page in light mode
+3. dashboard-overview-dark.png - Main dashboard dark mode
+4. dashboard-overview-light.png - Main dashboard light mode
+5. dashboard-sidebar-expanded.png - Sidebar fully expanded
+6. dashboard-sidebar-collapsed.png - Sidebar collapsed view
+7. profile-modal.png - User profile editing modal
+8. workflows-section.png - Workflows management page
+9. ssh-access-section.png - SSH access manager
+10. users-management.png - User management interface
+11. mobile-view.png - Mobile responsive view
+12. tablet-view.png - Tablet view
+
+To generate actual screenshots, deploy the application and use browser dev tools or screenshot tools.
