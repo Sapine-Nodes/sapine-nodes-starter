@@ -132,7 +132,10 @@ class Storage:
     
     def add_sshx_url(self, url: str):
         """Add SSHX URL to history"""
-        if url not in self.state["sshx_urls"]:
+        # Check if URL already exists in the history
+        url_exists = any(entry.get("url") == url for entry in self.state["sshx_urls"])
+        
+        if not url_exists:
             self.state["sshx_urls"].append({
                 "url": url,
                 "timestamp": datetime.now().isoformat()

@@ -1,6 +1,7 @@
 """
 GitHub API wrapper for workflow and repository management.
 """
+import asyncio
 import httpx
 from typing import Optional, Dict, List, Any
 import base64
@@ -219,7 +220,3 @@ class GitHubAPI:
         """Get currently active (in_progress or queued) workflow runs"""
         runs = await self.list_workflow_runs(repo, per_page=20)
         return [run for run in runs if run["status"] in ["in_progress", "queued"]]
-
-
-# Import asyncio for sleep function
-import asyncio
