@@ -1,81 +1,114 @@
 # GitHub Actions VM Manager
 
-A 24/7 Python-based system that manages GitHub Actions workflows as disposable Linux VMs with full control via Telegram Bot and **Enhanced Web Dashboard**.
+A 24/7 Python-based system that manages GitHub Actions workflows as disposable Linux VMs with **complete control via Web Dashboard**.
 
 ## 🎯 Purpose
 
 This system runs continuously on Render.com and provides:
-- **Telegram Bot** as the primary control panel
-- **🆕 Enhanced Web Dashboard** with 50+ features, modern UI, and user management
-- **Classic Web Dashboard** with beautiful responsive UI (still available)
-- **FastAPI** as the backend brain
-- **GitHub Actions** as disposable worker VMs
-- **SSHX** for remote SSH access to VMs
+- **🌐 Web Dashboard** as the PRIMARY control panel (full-featured admin interface)
+- **📱 Telegram Bot** for notifications only (optional)
+- **⚡ FastAPI** as the backend brain
+- **🐙 GitHub Actions** as disposable worker VMs
+- **🔒 SSHX** for secure remote SSH access to VMs
 
 ## ✨ Features
 
-### Telegram Bot Control Panel
-- 🟢 **Status Dashboard** - View system status, uptime, and current SSHX URL
-- 🔄 **Workflow Management** - Start, stop, and restart workflows
-- 🔑 **GitHub Account Management** - Add tokens, switch accounts dynamically
-- 📦 **Repository Management** - List, create, and switch repositories
-- 🔗 **SSH Access** - Get SSHX URLs for remote access
-- 📜 **History** - View past SSHX sessions and workflow runs
-- ⚙️ **Settings** - View and manage system settings
-- 🌐 **Web Credentials** - Configure web dashboard login
-- 📚 **Help Command** - `/help` for comprehensive documentation
+### 🌐 Web Admin Dashboard (PRIMARY CONTROL INTERFACE)
 
-### Web Dashboard 🆕
+**Complete Admin Panel** - All features accessible via modern web interface:
 
-#### Enhanced Dashboard (NEW - Version 2.0)
-- 🎨 **Modern UI** - Completely redesigned with gradient themes and premium fonts
-- 📱 **Fully Responsive** - Hamburger menu, collapsible sidebar, works on all devices
-- 🔐 **User Management** - Multi-user support with role-based access (Owner: ash)
-- 👤 **Profile System** - Avatar upload, profile customization
-- 📊 **50+ Features** - Comprehensive management interface
-- 🎯 **Quick Actions** - One-click workflow controls
-- 🔔 **Notifications** - Real-time notification center
-- ⌨️ **Command Palette** - Quick access with Ctrl+K
-- 🔍 **Global Search** - Search across all sections
-- 📈 **Analytics** - Performance and usage metrics
-- 🛠️ **Advanced Tools** - API management, webhooks, secrets, templates
-- 👥 **Team Features** - User permissions, activity logs, collaboration tools
+#### 🎨 Modern UI
+- Clean, professional design with gradient themes
+- Sidebar navigation with categorized sections
+- Dark theme optimized for long sessions
+- Fully responsive - works on desktop, tablet, and mobile
+- Real-time updates with auto-refresh
 
-Access at: `/enhanced-dashboard` (default)
+#### 🔑 GitHub Account Management
+- Add multiple GitHub Personal Access Tokens
+- Automatic token validation
+- Switch between accounts instantly
+- Secure encrypted token storage
 
-#### Classic Dashboard (Original)
-- 🎨 **Beautiful UI** - Modern, gradient design with smooth animations
-- 📱 **Fully Responsive** - Works perfectly on mobile, tablet, and desktop
-- 🔐 **Secure Authentication** - JWT-based login system
-- 📊 **Real-time Status** - Live system monitoring with auto-refresh
-- 🔗 **SSHX Access** - Click-to-open SSHX URLs
-- ⚡ **Quick Actions** - Start/Stop/Restart workflows with one click
-- 📜 **History View** - Browse past SSHX sessions
-- 🔄 **Auto-refresh** - Dashboard updates every 30 seconds
+#### 📦 Repository Management
+- List all repositories from active account
+- Create new repositories directly
+- Select active repository for workflows
+- One-click repository switching
 
-Access at: `/classic-dashboard`
+#### 🔄 Workflow Management
+- View all workflow files from `/workflows` directory
+- View workflow YAML content
+- Sync workflows to GitHub repository
+- List recent workflow runs (last 10)
+- View detailed logs for any run
+- Real-time status monitoring
 
-### Automatic Monitoring
-- Runs every 60 seconds
+#### ⚡ Quick Actions
+- Start workflow with one click
+- Stop all running workflows
+- Restart workflows instantly
+- All actions with confirmation dialogs
+
+#### 🔗 SSH Access
+- Display current SSHX URL prominently
+- One-click copy to clipboard
+- Direct link to open SSHX session
+- SSHX URL history viewer
+
+#### ⚙️ System Settings
+- Update web dashboard credentials
+- View current configuration
+- System uptime and restart counters
+- Active account and repository display
+
+#### 📊 Dashboard Overview
+- Live VM status indicator
+- System uptime counter
+- Total restarts tracker
+- System information cards
+- GitHub account and repository status
+
+**Access at:** `/admin` (default) or `/dashboard`
+
+### 📱 Telegram Bot (Notifications Only)
+
+The bot sends notifications but **does NOT provide control functions**. All control is via the web dashboard.
+
+**Notifications sent for:**
+- 🔗 New SSHX URL available
+- 🔄 Workflow restarts
+- ⚠️ System errors
+
+**Available commands:**
+- `/start` - Welcome message
+- `/help` - Documentation
+- `/status` - Quick status check
+
+**Note:** The bot redirects users to the web dashboard for all control operations.
+
+### 🔄 Automatic Monitoring (Background Service)
+- Runs every 60 seconds automatically
 - Auto-starts workflows when none are running
 - Auto-restarts on completion or failure
 - Detects and stores SSHX URLs from logs
 - Survives application restarts
+- No manual intervention needed
 
-### Security
-- Encrypted GitHub token storage
+### 🔒 Security
 - JWT-based web authentication
+- Encrypted GitHub token storage
+- Secure credential management
 - No secrets in code
-- Private chat enforcement for tokens
 - Token validation before storage
-- Configurable web credentials
+- Environment-based configuration
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - GitHub Account with Personal Access Token
-- Telegram Account and Bot Token
 - Render.com Account (free tier works)
+- (Optional) Telegram Account and Bot Token for notifications
 
 ### 1. Create GitHub Personal Access Token
 
@@ -85,15 +118,14 @@ Access at: `/classic-dashboard`
    - `workflow` (Update GitHub Action workflows)
 3. Copy the token (you'll need it later)
 
-### 2. Create Telegram Bot
+### 2. (Optional) Create Telegram Bot for Notifications
 
 1. Open Telegram and search for [@BotFather](https://t.me/botfather)
 2. Send `/newbot` and follow the instructions
 3. Copy the bot token provided
 4. Send `/setcommands` to BotFather and set:
    ```
-   start - Start the bot and show main menu
-   menu - Show main menu
+   start - Show welcome message
    help - Show help and documentation
    status - Quick status check
    ```
@@ -115,84 +147,91 @@ Access at: `/classic-dashboard`
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `python main.py`
    - **Plan**: Free (or paid for always-on)
-5. Add environment variable:
-   - `TELEGRAM_BOT_TOKEN` = Your bot token from BotFather
+5. Add environment variables (optional):
+   - `TELEGRAM_BOT_TOKEN` = Your bot token (only if you want notifications)
+   - `JWT_SECRET_KEY` = Random secret key for JWT (auto-generated if not set)
 6. Deploy!
 
-### 4. Configure via Telegram Bot
-
-1. Start a chat with your bot on Telegram
-2. Send `/start` to initialize
-3. Click **🔑 GitHub Account** → **➕ Add Token**
-4. Send your GitHub Personal Access Token (the message will be deleted)
-5. Click **📦 Repository** → **🆕 Create New** to create a repository
-6. Click **🔧 Push Workflow** to upload the workflow file
-7. Click **🧠 Workflow** → **▶️ Start Workflow** to start your first VM!
-
-### 5. Access Web Dashboard
+### 4. Access Web Dashboard
 
 1. Open your Render.com deployment URL in browser
-2. Login with default credentials:
-   - Username: `ash`
-   - Password: `root`
-3. Change credentials via bot: **⚙️ Settings** → **🌐 Web Credentials**
+2. You'll see the login page
+3. Login with default credentials:
+   - **Username**: `ash`
+   - **Password**: `root`
+4. **IMPORTANT:** Immediately change credentials via Settings page!
+
+### 5. Configure via Web Dashboard
+
+1. **Add GitHub Account:**
+   - Go to "GitHub Accounts" section
+   - Enter your Personal Access Token
+   - Click "Add Token" - it will be validated automatically
+
+2. **Create or Select Repository:**
+   - Go to "Repositories" section
+   - Either create a new repository or select an existing one
+   - The selected repository becomes active
+
+3. **Sync Workflow File:**
+   - Go to "Workflow Files" section
+   - Select `vm-worker.yml`
+   - Click "Sync to GitHub" to upload the workflow
+
+4. **Start Workflow:**
+   - Go to "Overview" or "Workflows" section
+   - Click "Start Workflow"
+   - Wait for SSHX URL to appear (check "SSH Access" section)
+
+5. **Access VM:**
+   - Go to "SSH Access" section
+   - Copy or click the SSHX URL
+   - You now have SSH access to your disposable VM!
 
 ## 🌐 Web Dashboard
 
 ### Features
 - **Real-time Monitoring** - Live status updates every 30 seconds
-- **Beautiful UI** - Modern gradient design with smooth animations
+- **Complete Control** - All operations available via web interface
+- **No Bot Required** - Fully functional without Telegram
+- **Modern UI** - Professional design with intuitive navigation
 - **Mobile Responsive** - Perfect on all device sizes
-- **Quick Actions** - Control workflows with one click
-- **SSHX Access** - Direct links to remote VMs
-- **History View** - Browse past sessions
+- **Secure** - JWT authentication with encrypted token storage
 
 ### Default Credentials
 - Username: `ash`
 - Password: `root`
 
-⚠️ **Change default credentials immediately via Telegram bot!**
+⚠️ **Change default credentials immediately via Settings page in the web dashboard!**
 
 ### How to Change Web Credentials
 
-Via Telegram Bot:
-1. Go to **⚙️ Settings**
-2. Click **🌐 Web Credentials**
-3. Click **🔐 Change Credentials**
-4. Send new credentials in format: `username password`
+Via Web Dashboard:
+1. Go to **Settings** section
+2. Enter current password
+3. Enter new username and/or new password
+4. Click **Update Credentials**
 
-Example: `myuser mypassword123`
+**Important:** You'll need to log in again with the new credentials.
 
-## 📱 Bot Interface
+## 📱 Telegram Bot (Optional Notifications)
 
 ### Bot Commands
-- `/start` - Start the bot and show main menu
-- `/menu` - Show main menu at any time
-- `/help` - Show comprehensive help documentation
+- `/start` - Show welcome message
+- `/help` - Show help and documentation
 - `/status` - Quick status check
 
-### Main Menu
-- **🟢 Status** - Current system status and SSHX URL
-- **🔄 Restart** - Restart workflow options
-- **🔑 GitHub Account** - Manage GitHub accounts
-- **📦 Repository** - Manage repositories
-- **🔗 SSH Access** - View and copy SSHX URL
-- **📜 History** - View workflow runs and SSHX history
-- **🧠 Workflow** - Workflow controls
-- **⚙️ Settings** - System settings
+### What the Bot Does
+- Sends notifications for SSHX URL changes
+- Alerts on workflow restarts
+- Reports system errors
+- Shows current status on command
 
-### Status Panel
-Shows:
-- Active GitHub account
-- Active repository
-- System uptime
-- Total restarts
-- Current SSHX URL
-
-### Workflow Controls
-- **▶️ Start Workflow** - Start a new workflow run
-- **⏸️ Stop Workflow** - Cancel running workflows
-- **📊 View Runs** - See last 10 workflow runs
+### What the Bot Does NOT Do
+- ❌ No control functions
+- ❌ No inline buttons for actions
+- ❌ No workflow management
+- ❌ All control is via web dashboard
 
 ## 🔧 How It Works
 
@@ -220,12 +259,13 @@ The system runs a background task every 60 seconds that:
 2. Starts SSHX server
 3. Outputs connection URL
 4. Monitor extracts URL from logs
-5. URL sent to Telegram bot
-6. Access VM via browser at the URL
+5. URL displayed in web dashboard
+6. (Optional) URL sent to Telegram
+7. Access VM via browser at the URL
 
 ### Workflow Lifecycle
 ```
-Bot Trigger → GitHub Actions Start → SSHX Install
+Web Dashboard Trigger → GitHub Actions Start → SSHX Install
 → SSHX Start → URL Extract → Monitor Detects
 → Run for 6h (timeout) → Complete → Auto-Restart
 ```
@@ -234,28 +274,37 @@ Bot Trigger → GitHub Actions Start → SSHX Install
 
 - **GitHub tokens** are encrypted using Fernet encryption
 - **Encryption key** is derived from environment salt
-- **Bot tokens** are environment variables only
 - **Web authentication** uses JWT tokens
 - **No secrets** committed to code
-- **Token messages** are deleted immediately in Telegram
-- **Web credentials** configurable via bot
+- **Web credentials** configurable via dashboard
 - **Default credentials** should be changed immediately
+- **All API endpoints** require authentication
 
 ## 📂 Project Structure
 
 ```
 .
-├── main.py              # FastAPI app + background monitor + web routes
-├── bot.py               # Telegram bot UI and handlers
+├── main.py                    # FastAPI app + background monitor + API routes
+├── bot_notification.py        # Telegram bot (notifications only)
 ├── github.py            # GitHub API wrapper
 ├── storage.py           # Persistent state management
 ├── sshx.py              # SSHX URL extraction
 ├── templates/           # Web dashboard HTML templates
 │   ├── login.html       # Login page
 │   └── dashboard.html   # Main dashboard
+├── bot.py               # Legacy bot (full control - deprecated)
+├── bot_notification.py  # New notification-only bot
+├── github.py            # GitHub API wrapper
+├── storage.py           # State management and persistence
+├── sshx.py              # SSHX URL extraction utilities
+├── templates/           # HTML templates
+│   ├── login.html       # Login page
+│   ├── admin_dashboard.html  # Complete admin panel (PRIMARY)
+│   ├── dashboard.html   # Classic dashboard (legacy)
+│   └── enhanced_dashboard.html  # Enhanced dashboard (legacy)
 ├── static/              # Static assets (CSS, JS, images)
 │   └── styles.css       # Additional styles
-├── workflows/           # Workflow YAML files
+├── workflows/           # Workflow YAML files (editable)
 │   └── vm-worker.yml    # Main VM worker workflow
 ├── HELP.md              # Comprehensive help documentation
 ├── requirements.txt     # Python dependencies
@@ -264,18 +313,18 @@ Bot Trigger → GitHub Actions Start → SSHX Install
 └── README.md           # This file
 ```
 
-## 🔄 Switching Accounts & Repositories
+## 🔄 Managing Accounts & Repositories
 
 ### Switch GitHub Account
-1. Go to **🔑 GitHub Account**
-2. Click **🔀 Switch Account**
-3. Select the account to activate
+1. Go to **GitHub Accounts** section in web dashboard
+2. Click **Switch** button next to the account you want to activate
+3. The account becomes active immediately
 
 ### Switch Repository
-1. Go to **📦 Repository**
-2. Click **📋 List Repos** to see available repos
-3. Select or create a new repository
-4. Click **🔧 Push Workflow** to update workflow files
+1. Go to **Repositories** section in web dashboard
+2. Click **Select** button next to the repository you want to activate
+3. The repository becomes active immediately
+4. Don't forget to sync workflow files after switching!
 
 ## 📊 API Endpoints
 
@@ -312,8 +361,8 @@ Login and get JWT token
 ```json
 Request:
 {
-  "username": "admin",
-  "password": "admin"
+  "username": "ash",
+  "password": "root"
 }
 
 Response:
@@ -377,27 +426,229 @@ Response:
 }
 ```
 
+#### POST /api/github/token
+Add GitHub token (authenticated)
+```json
+Request:
+{
+  "token": "ghp_xxxxxxxxxxxx"
+}
+
+Response:
+{
+  "success": true,
+  "username": "github-username",
+  "message": "GitHub token added for github-username"
+}
+```
+
+#### GET /api/github/accounts
+List GitHub accounts (authenticated)
+```json
+Response:
+{
+  "success": true,
+  "accounts": ["user1", "user2"],
+  "active_account": "user1"
+}
+```
+
+#### POST /api/github/switch
+Switch GitHub account (authenticated)
+```json
+Request:
+{
+  "username": "user2"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Switched to user2"
+}
+```
+
+#### GET /api/repos
+List repositories (authenticated)
+```json
+Response:
+{
+  "success": true,
+  "repositories": [
+    {"name": "repo1", "full_name": "user/repo1"},
+    {"name": "repo2", "full_name": "user/repo2"}
+  ],
+  "active_repo": "user/repo1"
+}
+```
+
+#### POST /api/repos/create
+Create repository (authenticated)
+```json
+Request:
+{
+  "name": "my-vm-repo",
+  "description": "GitHub Actions VM Manager"
+}
+
+Response:
+{
+  "success": true,
+  "repo_name": "user/my-vm-repo",
+  "message": "Repository user/my-vm-repo created"
+}
+```
+
+#### POST /api/repos/select
+Select repository (authenticated)
+```json
+Request:
+{
+  "repo": "user/repo-name"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Selected repository user/repo-name"
+}
+```
+
+#### GET /api/workflows/files
+List workflow files (authenticated)
+```json
+Response:
+{
+  "success": true,
+  "files": ["vm-worker.yml"]
+}
+```
+
+#### POST /api/workflows/sync
+Sync workflow to GitHub (authenticated)
+```json
+Request:
+{
+  "filename": "vm-worker.yml"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Workflow vm-worker.yml synced to GitHub"
+}
+```
+
+#### GET /api/runs
+List workflow runs (authenticated)
+```json
+Response:
+{
+  "success": true,
+  "runs": [
+    {
+      "id": 12345,
+      "run_number": 1,
+      "status": "in_progress",
+      "created_at": "2024-01-01T12:00:00Z"
+    }
+  ]
+}
+```
+
+#### GET /api/runs/{run_id}/logs
+Get workflow run logs (authenticated)
+```json
+Response:
+{
+  "success": true,
+  "logs": "workflow log content..."
+}
+```
+
+#### GET /api/settings
+Get system settings (authenticated)
+```json
+Response:
+{
+  "success": true,
+  "settings": {
+    "web_username": "ash",
+    "active_account": "github-user",
+    "active_repo": "user/repo",
+    "uptime_seconds": 3600,
+    "total_restarts": 5
+  }
+}
+```
+
+#### POST /api/settings/credentials
+Update web credentials (authenticated)
+```json
+Request:
+{
+  "current_password": "root",
+  "new_username": "newuser",
+  "new_password": "newpass"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Credentials updated successfully"
+}
+```
+
 ## 🐛 Troubleshooting
 
-### Bot not responding
-- Check TELEGRAM_BOT_TOKEN is set correctly
+### Web Dashboard Issues
+
+**Can't login:**
+- Default credentials are `ash` / `root`
+- Check if credentials were changed
+- Clear browser cache and cookies
+- Check browser console for errors
+
+**Dashboard not loading:**
+- Verify the application is running on Render
 - Check Render logs for errors
-- Restart the service on Render
+- Ensure PORT environment variable is set correctly
 
-### Workflow not starting
-- Ensure GitHub token has correct permissions
-- Check repository exists and has workflow file
-- Verify workflow file is at `.github/workflows/vm-worker.yml`
+### Bot Issues
 
-### No SSHX URL
+**Bot not sending notifications:**
+- Bot is optional - system works without it
+- Check TELEGRAM_BOT_TOKEN is set correctly
+- Check Render logs for bot startup errors
+- Verify bot token with @BotFather
+
+### Workflow Issues
+
+**Workflow not starting:**
+- Ensure GitHub token has correct permissions (`repo` and `workflow`)
+- Check repository exists and is accessible
+- Verify workflow file is synced to `.github/workflows/` in the repository
+- Check GitHub Actions are enabled for the repository
+
+**No SSHX URL:**
 - Wait 2-3 minutes after workflow starts
-- Check workflow logs on GitHub
+- Check workflow logs on GitHub Actions tab
 - SSHX installation might have failed
+- Verify workflow file contains SSHX installation steps
 
-### Application restarts frequently
-- On free tier, Render may spin down after 15 minutes of inactivity
+### Application Issues
+
+**Application restarts frequently:**
+- On Render free tier, may spin down after 15 minutes of inactivity
 - Upgrade to paid plan for true 24/7 operation
 - Check logs for errors causing crashes
+- Verify all dependencies are installed correctly
+
+**Background monitor not working:**
+- Check Render logs for monitor errors
+- Verify GitHub token is valid
+- Ensure repository is selected
+- Check workflow file exists in repository
 
 ### Web Dashboard not loading
 - Verify service is running on Render
