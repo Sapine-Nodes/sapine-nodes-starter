@@ -47,3 +47,7 @@ state.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Testing
+test_validation.py
+test_state.json
