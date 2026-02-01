@@ -1,0 +1,158 @@
+PURPOSE:
+Build a 24/7 Python-based API + Telegram Bot system that manages GitHub Actions workflows as disposable Linux VMs.
+The system must run continuously on Render.com and allow FULL control via a Telegram bot with inline buttons and keyboards.
+
+The bot is the primary control panel.
+The API is the brain.
+GitHub Actions are disposable workers.
+
+DEPLOYMENT TARGET:
+- Render.com (Always-on Web Service)
+- Python 3.10+
+- FastAPI (preferred) or Flask
+- Telegram Bot using python-telegram-bot or aiogram
+
+CORE CAPABILITIES:
+- Monitor GitHub Actions workflows continuously
+- Automatically restart workflows when they stop (6h timeout, failure, cancel)
+- Expose SSH access using SSHX
+- Notify Telegram bot with SSHX URL
+- Allow FULL management via Telegram UI
+
+TELEGRAM BOT (MANDATORY):
+The Telegram bot must:
+- Use inline buttons + reply keyboard (good UI)
+- Act as a dashboard, not just commands
+- Store GitHub credentials inside the bot (securely)
+
+BOT FEATURES:
+- Start / Stop workflow
+- Restart workflow manually
+- Show current SSHX URL
+- Show workflow runtime & uptime
+- Show current GitHub repo in use
+- Switch GitHub accounts dynamically
+- Switch repositories dynamically
+- View previous SSHX sessions (history)
+- View last 10 workflow runs
+- Force-create new repo
+- Force-push workflow files
+- Health & status panel
+
+BOT UI REQUIREMENTS:
+- Inline buttons for actions
+- Keyboard menu for navigation
+- Back button everywhere
+- Status messages must be formatted (monospace, emojis ok)
+- No spam — edit messages when possible
+
+Example Sections:
+- 🟢 Status
+- 🔄 Restart Worker
+- 🔑 GitHub Account
+- 📦 Repository
+- 🧠 Workflow
+- 🔗 SSH Access
+- 📜 History
+- ⚙️ Settings
+
+GITHUB CREDENTIAL HANDLING (IMPORTANT):
+- User enters GitHub token via bot (private chat only)
+- Token is encrypted or securely stored
+- Allow switching GitHub accounts without redeploying
+- Bot validates token before saving
+- Bot can list user repos and select one
+
+REPO LOGIC:
+- Use selected repo if exists
+- If not:
+  - Auto-create repo
+- If repo creation fails:
+  - Create fallback repo
+- Repos must be public by default
+- Repo name stored in persistent state
+
+WORKFLOW MANAGEMENT:
+- Workflow YAML files must live in /workflows
+- Bot can trigger re-push of workflows
+- Workflow files editable without touching API code
+- API copies workflows into repo via GitHub API
+- Workflow must:
+  - install SSHX
+  - start SSHX
+  - print public SSHX URL
+
+SSHX HANDLING:
+- Extract SSHX URL from logs
+- Store current + previous URLs
+- Send URL to Telegram bot
+- Button to re-send SSHX URL
+- SSHX failure triggers auto-restart
+
+BACKGROUND MONITOR (CRITICAL):
+- Runs every 60 seconds
+- Uses GitHub REST API
+- Logic:
+  IF no workflow running → start one
+  IF workflow completed → restart
+  IF SSHX missing → restart
+- Must survive Render restarts
+
+STATE MANAGEMENT:
+Persist using JSON or SQLite:
+- GitHub token(s)
+- Active account
+- Active repo
+- Workflow ID
+- Last run ID
+- SSHX URL history
+- Uptime counters
+- Last restart reason
+
+API ENDPOINTS (MINIMAL):
+- GET /health
+- GET /status
+- POST /restart
+
+BOT ↔ API INTERACTION:
+- Bot calls internal API functions directly
+- No webhook dependency required
+- Bot and API run in same process or same service
+
+SECURITY:
+- No secrets in code
+- Environment variable only for Telegram bot token
+- GitHub tokens provided at runtime via bot
+- Private chat enforcement
+
+FILES (KEEP CLEAN):
+- main.py        → FastAPI + background monitor
+- bot.py         → Telegram bot UI logic
+- github.py      → GitHub API wrapper
+- sshx.py        → SSHX log parsing
+- storage.py     → persistent state
+- workflows/     → editable YAMLs
+- README.md
+
+README.md MUST INCLUDE:
+- One-click Render.com deploy guide
+- Bot setup steps
+- Required environment variables
+- Bot command + UI explanation
+- How auto-restart works
+- SSHX usage
+- Repo & account switching explanation
+
+IMPORTANT RULES:
+- No GitHub workflow chaining
+- No cron inside GitHub
+- No manual intervention needed after setup
+- External API + bot controls everything
+- Must be production-grade, logical, and stable
+
+DELIVERABLE:
+Provide a complete, deployable Python project that:
+- runs 24/7 on Render
+- manages GitHub Actions like disposable VMs
+- exposes SSHX
+- is fully controlled via a Telegram bot UI
