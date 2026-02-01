@@ -1,5 +1,6 @@
 """
 GitHub API wrapper for workflow and repository management.
+Requires Python 3.10+ for modern type hints (tuple[...] syntax).
 """
 import asyncio
 import httpx

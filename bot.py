@@ -616,8 +616,15 @@ class TelegramBot:
         await query.edit_message_text("🔧 Pushing workflow file...")
         
         try:
-            # Read workflow file
-            workflow_path = "workflows/vm-worker.yml"
+            # Read workflow file (use absolute path based on script location)
+            import os
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            workflow_path = os.path.join(script_dir, "workflows", "vm-worker.yml")
+            
+            if not os.path.exists(workflow_path):
+                await query.message.reply_text("❌ Workflow file not found. Please ensure workflows/vm-worker.yml exists.")
+                return
+            
             with open(workflow_path, 'r') as f:
                 workflow_content = f.read()
             
