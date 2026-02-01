@@ -1,0 +1,51 @@
+name: VM Worker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  vm-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # 6 hours max
+    
+    steps:
+      - name: Setup Environment
+        run: |
+          echo "🚀 Starting VM Worker..."
+          echo "Timestamp: $(date)"
+          
+      - name: Install SSHX
+        run: |
+          echo "📦 Installing SSHX..."
+          curl -sSf https://sshx.io/get | sh
+          
+      - name: Start SSHX Server
+        run: |
+          echo "🔗 Starting SSHX server..."
+          # Start sshx in background
+          ~/.local/bin/sshx --quiet > sshx_output.txt 2>&1 &
+          SSHX_PID=$!
+          
+          # Wait for SSHX to start and generate URL
+          echo "⏳ Waiting for SSHX URL..."
+          sleep 5
+          
+          # Display the URL
+          if [ -f sshx_output.txt ]; then
+            cat sshx_output.txt
+            echo ""
+            echo "✅ SSHX is ready!"
+          else
+            echo "⚠️ SSHX output not found"
+          fi
+          
+          # Keep the session alive
+          echo "🔄 Keeping session alive..."
+          
+          # Function to check if SSHX is still running
+          while kill -0 $SSHX_PID 2>/dev/null; do
+            echo "⏰ [$(date)] Session active - Uptime: $SECONDS seconds"
+            sleep 300  # Print status every 5 minutes
+          done
+          
+          echo "❌ SSHX process ended"
