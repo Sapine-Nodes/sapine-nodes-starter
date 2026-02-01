@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0a0e1a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1187,12 +1187,12 @@
             }
         }
         
-        /* Reduced motion */
+        /* Reduce motion for accessibility */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
-                animation-duration: 0.01ms !important;
+                animation-duration: 1ms !important;
                 animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
+                transition-duration: 1ms !important;
             }
         }
     </style>
@@ -1222,11 +1222,11 @@
         <nav class="sidebar-nav">
             <div class="nav-section">
                 <div class="nav-section-title">Dashboard</div>
-                <div class="nav-item active" onclick="showSection('overview')" data-section="overview">
+                <div class="nav-item active" onclick="showSection('overview')" data-section="overview" tabindex="0" role="button" onkeydown="if(event.key==='Enter')showSection('overview')">
                     <i class="fas fa-chart-pie"></i>
                     <span>Overview</span>
                 </div>
-                <div class="nav-item" onclick="showSection('workflows')" data-section="workflows">
+                <div class="nav-item" onclick="showSection('workflows')" data-section="workflows" tabindex="0" role="button" onkeydown="if(event.key==='Enter')showSection('workflows')">
                     <i class="fas fa-play-circle"></i>
                     <span>Workflows</span>
                 </div>
@@ -1234,15 +1234,15 @@
             
             <div class="nav-section">
                 <div class="nav-section-title">Management</div>
-                <div class="nav-item" onclick="showSection('github')" data-section="github">
+                <div class="nav-item" onclick="showSection('github')" data-section="github" tabindex="0" role="button" onkeydown="if(event.key==='Enter')showSection('github')">
                     <i class="fab fa-github"></i>
                     <span>GitHub Accounts</span>
                 </div>
-                <div class="nav-item" onclick="showSection('repositories')" data-section="repositories">
+                <div class="nav-item" onclick="showSection('repositories')" data-section="repositories" tabindex="0" role="button" onkeydown="if(event.key==='Enter')showSection('repositories')">
                     <i class="fas fa-code-branch"></i>
                     <span>Repositories</span>
                 </div>
-                <div class="nav-item" onclick="showSection('workflow-files')" data-section="workflow-files">
+                <div class="nav-item" onclick="showSection('workflow-files')" data-section="workflow-files" tabindex="0" role="button" onkeydown="if(event.key==='Enter')showSection('workflow-files')">
                     <i class="fas fa-file-code"></i>
                     <span>Workflow Files</span>
                 </div>
@@ -1250,11 +1250,11 @@
             
             <div class="nav-section">
                 <div class="nav-section-title">Access</div>
-                <div class="nav-item" onclick="showSection('ssh')" data-section="ssh">
+                <div class="nav-item" onclick="showSection('ssh')" data-section="ssh" tabindex="0" role="button" onkeydown="if(event.key==='Enter')showSection('ssh')">
                     <i class="fas fa-terminal"></i>
                     <span>SSH Access</span>
                 </div>
-                <div class="nav-item" onclick="showSection('history')" data-section="history">
+                <div class="nav-item" onclick="showSection('history')" data-section="history" tabindex="0" role="button" onkeydown="if(event.key==='Enter')showSection('history')">
                     <i class="fas fa-clock-rotate-left"></i>
                     <span>History</span>
                 </div>
@@ -1262,7 +1262,7 @@
             
             <div class="nav-section">
                 <div class="nav-section-title">System</div>
-                <div class="nav-item" onclick="showSection('settings')" data-section="settings">
+                <div class="nav-item" onclick="showSection('settings')" data-section="settings" tabindex="0" role="button" onkeydown="if(event.key==='Enter')showSection('settings')">
                     <i class="fas fa-gear"></i>
                     <span>Settings</span>
                 </div>
@@ -1742,9 +1742,20 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
+            const isOpening = !sidebar.classList.contains('visible');
+            
             sidebar.classList.toggle('visible');
             overlay.classList.toggle('active');
-            document.body.style.overflow = sidebar.classList.contains('visible') ? 'hidden' : '';
+            
+            if (isOpening) {
+                // Focus first nav item when opening
+                const firstNavItem = sidebar.querySelector('.nav-item');
+                if (firstNavItem) firstNavItem.focus();
+            } else {
+                // Return focus to menu toggle when closing
+                const menuToggle = document.querySelector('.menu-toggle');
+                if (menuToggle) menuToggle.focus();
+            }
         }
         
         function closeSidebar() {
@@ -1752,8 +1763,21 @@
             const overlay = document.getElementById('sidebarOverlay');
             sidebar.classList.remove('visible');
             overlay.classList.remove('active');
-            document.body.style.overflow = '';
+            
+            // Return focus to menu toggle when closing
+            const menuToggle = document.querySelector('.menu-toggle');
+            if (menuToggle) menuToggle.focus();
         }
+        
+        // Handle Escape key to close sidebar
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('visible')) {
+                    closeSidebar();
+                }
+            }
+        });
         
         // Alert system
         function showAlert(message, type = 'info') {

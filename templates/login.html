@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0a0e1a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -604,9 +604,9 @@
         /* Reduce motion for accessibility */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
-                animation-duration: 0.01ms !important;
+                animation-duration: 1ms !important;
                 animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
+                transition-duration: 1ms !important;
             }
         }
     </style>
@@ -752,11 +752,6 @@
         function showError(message) {
             errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
             errorDiv.classList.add('show');
-            
-            // Add haptic feedback on mobile if supported
-            if (navigator.vibrate) {
-                navigator.vibrate([50, 30, 50]);
-            }
             
             setTimeout(() => {
                 errorDiv.classList.remove('show');
