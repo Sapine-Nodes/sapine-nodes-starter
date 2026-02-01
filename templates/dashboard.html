@@ -1,31 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - GitHub VM Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --border-color: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #06b6d4;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #06b6d4;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f7fafc;
-            color: #2d3748;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             color: white;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
         }
         
         .header-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -35,93 +77,162 @@
         }
         
         .header h1 {
-            font-size: 24px;
+            font-size: 26px;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .header h1 i {
+            font-size: 28px;
         }
         
         .header-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
         
         .btn {
             padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn-primary {
-            background: white;
-            color: #667eea;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
         
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
         
         .btn-secondary:hover {
+            background: var(--bg-card);
+            transform: translateY(-2px);
+        }
+        
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .theme-toggle:hover {
             background: rgba(255, 255, 255, 0.3);
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 30px auto;
             padding: 0 20px;
         }
         
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
             margin-bottom: 30px;
         }
         
         .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card:hover::before {
+            opacity: 1;
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 12px 40px var(--shadow);
         }
         
         .card-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            color: var(--text-primary);
+        }
+        
+        .card-title i {
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .card-content {
-            color: #4a5568;
+            color: var(--text-secondary);
         }
         
         .status-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #e2e8f0;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .status-item:last-child {
@@ -130,105 +241,145 @@
         
         .status-label {
             font-weight: 500;
-            color: #718096;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-label i {
+            color: var(--accent-primary);
         }
         
         .status-value {
             font-weight: 600;
-            color: #2d3748;
-            font-family: 'Monaco', 'Courier New', monospace;
+            color: var(--text-primary);
+            font-family: 'Fira Code', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
         }
         
         .badge {
-            display: inline-block;
-            padding: 4px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
         }
         
         .badge-success {
-            background: #c6f6d5;
-            color: #22543d;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
         }
         
         .badge-warning {
-            background: #feebc8;
-            color: #7c2d12;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid var(--warning);
         }
         
         .badge-danger {
-            background: #fed7d7;
-            color: #742a2a;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+        
+        .badge-info {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--info);
+            border: 1px solid var(--info);
         }
         
         .sshx-url {
-            background: #edf2f7;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 12px;
             word-break: break-all;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 14px;
+            font-family: 'Fira Code', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
         }
         
         .sshx-url a {
-            color: #667eea;
+            color: var(--accent-primary);
             text-decoration: none;
+            transition: color 0.3s ease;
         }
         
         .sshx-url a:hover {
+            color: var(--accent-secondary);
             text-decoration: underline;
         }
         
         .actions {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 16px;
             flex-wrap: wrap;
         }
         
         .btn-small {
-            padding: 8px 16px;
+            padding: 10px 16px;
             font-size: 13px;
         }
         
         .btn-success {
-            background: #48bb78;
+            background: var(--success);
             color: white;
+            border: 1px solid var(--success);
         }
         
         .btn-success:hover {
-            background: #38a169;
+            background: #059669;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
         }
         
         .btn-danger {
-            background: #f56565;
+            background: var(--error);
             color: white;
+            border: 1px solid var(--error);
         }
         
         .btn-danger:hover {
-            background: #e53e3e;
+            background: #dc2626;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
         }
         
         .btn-info {
-            background: #4299e1;
+            background: var(--info);
             color: white;
+            border: 1px solid var(--info);
         }
         
         .btn-info:hover {
-            background: #3182ce;
+            background: #0891b2;
+            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+            border: 1px solid var(--warning);
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
         }
         
         .loading {
             text-align: center;
             padding: 40px;
-            color: #718096;
+            color: var(--text-secondary);
         }
         
         .spinner {
-            border: 3px solid #e2e8f0;
-            border-top: 3px solid #667eea;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-primary);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -242,43 +393,86 @@
         }
         
         .history-item {
-            padding: 12px;
-            background: #f7fafc;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            padding: 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .history-item:hover {
+            background: var(--bg-card);
+            transform: translateX(5px);
         }
         
         .history-time {
             font-size: 12px;
-            color: #718096;
-            margin-bottom: 5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .history-time i {
+            color: var(--accent-primary);
         }
         
         .history-url {
-            font-family: 'Monaco', 'Courier New', monospace;
+            font-family: 'Fira Code', 'Monaco', 'Courier New', monospace;
             font-size: 13px;
-            color: #2d3748;
+            color: var(--text-primary);
         }
         
         .alert {
-            padding: 15px;
-            border-radius: 10px;
+            padding: 16px;
+            border-radius: 12px;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.3s ease;
+            border: 1px solid;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert i {
+            font-size: 20px;
         }
         
         .alert-info {
-            background: #bee3f8;
-            color: #2c5282;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--info);
+            border-color: var(--info);
         }
         
         .alert-success {
-            background: #c6f6d5;
-            color: #22543d;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border-color: var(--success);
         }
         
         .alert-error {
-            background: #fed7d7;
-            color: #742a2a;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+            border-color: var(--error);
+        }
+        
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border-color: var(--warning);
         }
         
         @media (max-width: 768px) {
@@ -294,6 +488,30 @@
             .header-actions {
                 width: 100%;
                 justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn, .btn-small {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
             }
         }
     </style>
@@ -301,10 +519,22 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <h1>🤖 GitHub VM Manager</h1>
+            <h1>
+                <i class="fas fa-server"></i>
+                GitHub VM Manager
+            </h1>
             <div class="header-actions">
-                <button class="btn btn-secondary btn-small" onclick="refreshData()">🔄 Refresh</button>
-                <button class="btn btn-primary btn-small" onclick="logout()">Logout</button>
+                <button class="btn theme-toggle btn-small" onclick="toggleTheme()" title="Toggle Theme">
+                    <i id="themeIcon" class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+                <button class="btn btn-primary btn-small" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
             </div>
         </div>
     </div>
@@ -315,7 +545,10 @@
         <div class="grid">
             <!-- Status Card -->
             <div class="card">
-                <div class="card-title">🟢 System Status</div>
+                <div class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    System Status
+                </div>
                 <div class="card-content" id="statusContent">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -326,7 +559,10 @@
             
             <!-- SSH Access Card -->
             <div class="card">
-                <div class="card-title">🔗 SSH Access</div>
+                <div class="card-title">
+                    <i class="fas fa-terminal"></i>
+                    SSH Access
+                </div>
                 <div class="card-content" id="sshContent">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -337,12 +573,24 @@
             
             <!-- Quick Actions Card -->
             <div class="card">
-                <div class="card-title">⚡ Quick Actions</div>
+                <div class="card-title">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </div>
                 <div class="card-content">
                     <div class="actions">
-                        <button class="btn btn-success btn-small" onclick="startWorkflow()">▶️ Start Workflow</button>
-                        <button class="btn btn-danger btn-small" onclick="stopWorkflow()">⏸️ Stop Workflow</button>
-                        <button class="btn btn-info btn-small" onclick="restartWorkflow()">🔄 Restart</button>
+                        <button class="btn btn-success btn-small" onclick="startWorkflow()">
+                            <i class="fas fa-play"></i>
+                            Start Workflow
+                        </button>
+                        <button class="btn btn-danger btn-small" onclick="stopWorkflow()">
+                            <i class="fas fa-stop"></i>
+                            Stop Workflow
+                        </button>
+                        <button class="btn btn-warning btn-small" onclick="restartWorkflow()">
+                            <i class="fas fa-redo"></i>
+                            Restart
+                        </button>
                     </div>
                 </div>
             </div>
@@ -350,7 +598,10 @@
         
         <!-- History Card -->
         <div class="card">
-            <div class="card-title">📜 SSHX History</div>
+            <div class="card-title">
+                <i class="fas fa-history"></i>
+                SSHX History
+            </div>
             <div class="card-content" id="historyContent">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -368,6 +619,30 @@
         
         if (!token) {
             window.location.href = '/login';
+        }
+        
+        // Theme Management
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const icon = document.getElementById('themeIcon');
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            showAlert(`Switched to ${newTheme} mode`, 'info');
+        }
+        
+        // Initialize theme from localStorage
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const icon = document.getElementById('themeIcon');
+            
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
         
         async function apiCall(endpoint, method = 'GET', body = null) {
@@ -400,19 +675,31 @@
                 if (data) {
                     const html = `
                         <div class="status-item">
-                            <span class="status-label">Account</span>
+                            <span class="status-label">
+                                <i class="fas fa-user"></i>
+                                Account
+                            </span>
                             <span class="status-value">${data.account || 'Not set'}</span>
                         </div>
                         <div class="status-item">
-                            <span class="status-label">Repository</span>
+                            <span class="status-label">
+                                <i class="fas fa-code-branch"></i>
+                                Repository
+                            </span>
                             <span class="status-value">${data.repository || 'Not set'}</span>
                         </div>
                         <div class="status-item">
-                            <span class="status-label">Uptime</span>
+                            <span class="status-label">
+                                <i class="fas fa-clock"></i>
+                                Uptime
+                            </span>
                             <span class="status-value">${formatUptime(data.uptime_seconds)}</span>
                         </div>
                         <div class="status-item">
-                            <span class="status-label">Restarts</span>
+                            <span class="status-label">
+                                <i class="fas fa-redo"></i>
+                                Restarts
+                            </span>
                             <span class="status-value">${data.restart_info.total_restarts}</span>
                         </div>
                     `;
@@ -430,16 +717,29 @@
                 if (data) {
                     const html = data.sshx_url 
                         ? `
-                            <p style="margin-bottom: 10px;">Current SSHX URL:</p>
+                            <p style="margin-bottom: 12px; color: var(--text-secondary);">
+                                <i class="fas fa-link"></i> Current SSHX URL:
+                            </p>
                             <div class="sshx-url">
                                 <a href="${data.sshx_url}" target="_blank">${data.sshx_url}</a>
                             </div>
                             <div class="actions">
-                                <button class="btn btn-info btn-small" onclick="copySSHX('${data.sshx_url}')">📋 Copy URL</button>
-                                <a href="${data.sshx_url}" target="_blank" class="btn btn-success btn-small">🌐 Open</a>
+                                <button class="btn btn-info btn-small" onclick="copySSHX('${data.sshx_url}')">
+                                    <i class="fas fa-copy"></i>
+                                    Copy URL
+                                </button>
+                                <a href="${data.sshx_url}" target="_blank" class="btn btn-success btn-small">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    Open
+                                </a>
                             </div>
                         `
-                        : '<p style="color: #718096;">No SSHX URL available. Start a workflow to get access.</p>';
+                        : `
+                            <p style="color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-info-circle"></i>
+                                No SSHX URL available. Start a workflow to get access.
+                            </p>
+                        `;
                     
                     document.getElementById('sshContent').innerHTML = html;
                 }
@@ -455,7 +755,10 @@
                 if (data && data.sshx_urls && data.sshx_urls.length > 0) {
                     const html = data.sshx_urls.map(entry => `
                         <div class="history-item">
-                            <div class="history-time">${formatDate(entry.timestamp)}</div>
+                            <div class="history-time">
+                                <i class="fas fa-calendar-alt"></i>
+                                ${formatDate(entry.timestamp)}
+                            </div>
                             <div class="history-url">${entry.url}</div>
                         </div>
                     `).join('');
@@ -463,11 +766,11 @@
                     document.getElementById('historyContent').innerHTML = html;
                 } else {
                     document.getElementById('historyContent').innerHTML = 
-                        '<p style="color: #718096;">No history available yet.</p>';
+                        '<p style="color: var(--text-secondary); display: flex; align-items: center; gap: 8px;"><i class="fas fa-info-circle"></i> No history available yet.</p>';
                 }
             } catch (error) {
                 document.getElementById('historyContent').innerHTML = 
-                    '<p style="color: #e53e3e;">Error loading history</p>';
+                    '<p style="color: var(--error); display: flex; align-items: center; gap: 8px;"><i class="fas fa-exclamation-triangle"></i> Error loading history</p>';
             }
         }
         
@@ -475,6 +778,7 @@
             if (!confirm('Start a new workflow?')) return;
             
             try {
+                showAlert('Starting workflow...', 'info');
                 const data = await apiCall('/workflow/start', 'POST');
                 if (data && data.success) {
                     showAlert('Workflow started successfully!', 'success');
@@ -491,6 +795,7 @@
             if (!confirm('Stop all running workflows?')) return;
             
             try {
+                showAlert('Stopping workflow...', 'info');
                 const data = await apiCall('/workflow/stop', 'POST');
                 if (data && data.success) {
                     showAlert('Workflow stopped successfully!', 'success');
@@ -507,7 +812,16 @@
             if (!confirm('Restart workflow? This will stop current workflow and start a new one.')) return;
             
             try {
-                const data = await apiCall('/restart', 'POST', { reason: 'Manual restart from web dashboard' });
+                showAlert('Restarting workflow...', 'info');
+                const response = await fetch('/restart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: 'Manual restart from web dashboard' })
+                });
+                
+                const data = await response.json();
                 if (data && data.success) {
                     showAlert('Workflow restarted successfully!', 'success');
                     setTimeout(refreshData, 2000);
@@ -545,13 +859,21 @@
         function showAlert(message, type = 'info') {
             const alerts = document.getElementById('alerts');
             const alert = document.createElement('div');
+            const icons = {
+                info: 'fa-info-circle',
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-triangle',
+                warning: 'fa-exclamation-circle'
+            };
+            
             alert.className = `alert alert-${type}`;
-            alert.textContent = message;
+            alert.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
             
             alerts.appendChild(alert);
             
             setTimeout(() => {
-                alert.remove();
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
             }, 5000);
         }
         
@@ -566,7 +888,8 @@
             window.location.href = '/login';
         }
         
-        // Initial load
+        // Initialize on load
+        initTheme();
         refreshData();
         
         // Auto-refresh every 30 seconds

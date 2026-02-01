@@ -1,34 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - GitHub VM Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --border-color: #334155;
+            --success: #10b981;
+            --error: #ef4444;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            opacity: 0.1;
+            pointer-events: none;
         }
         
         .login-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px var(--shadow);
             padding: 40px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             animation: slideUp 0.5s ease;
+            position: relative;
+            z-index: 1;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         
         @keyframes slideUp {
@@ -42,20 +94,71 @@
             }
         }
         
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        .theme-toggle i {
+            font-size: 16px;
+            color: var(--text-primary);
+            transition: transform 0.3s ease;
+        }
+        
+        .theme-toggle:hover i {
+            transform: rotate(180deg);
+        }
+        
         .logo {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+        }
+        
+        .logo-icon {
+            font-size: 48px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .logo h1 {
-            font-size: 28px;
-            color: #667eea;
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 10px;
+            letter-spacing: -0.5px;
         }
         
         .logo p {
-            color: #718096;
-            font-size: 14px;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 400;
         }
         
         .form-group {
@@ -63,63 +166,124 @@
         }
         
         .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
             font-weight: 500;
             font-size: 14px;
         }
         
+        .form-group label i {
+            color: var(--accent-primary);
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+        
         .form-group input {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s;
+            padding: 14px 15px 14px 45px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
         
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: var(--bg-card);
+        }
+        
+        .form-group input:focus + .input-icon {
+            color: var(--accent-primary);
         }
         
         .btn {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.4);
         }
         
         .btn:active {
             transform: translateY(0);
         }
         
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         .error {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 12px;
-            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 14px;
+            border-radius: 12px;
             margin-bottom: 20px;
             font-size: 14px;
             display: none;
+            align-items: center;
+            gap: 10px;
         }
         
         .error.show {
-            display: block;
+            display: flex;
             animation: shake 0.5s;
+        }
+        
+        .error i {
+            font-size: 18px;
         }
         
         @keyframes shake {
@@ -130,9 +294,15 @@
         
         .footer {
             text-align: center;
-            margin-top: 20px;
-            color: #718096;
-            font-size: 12px;
+            margin-top: 25px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .footer i {
+            color: var(--accent-primary);
+            margin-right: 5px;
         }
         
         @media (max-width: 480px) {
@@ -148,8 +318,15 @@
 </head>
 <body>
     <div class="login-container">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+            <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+        
         <div class="logo">
-            <h1>🤖 VM Manager</h1>
+            <div class="logo-icon">
+                <i class="fas fa-server"></i>
+            </div>
+            <h1>VM Manager</h1>
             <p>GitHub Actions VM Control Panel</p>
         </div>
         
@@ -157,30 +334,72 @@
         
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required autocomplete="username">
+                <label for="username">
+                    <i class="fas fa-user"></i>
+                    Username
+                </label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter username">
+                    <i class="fas fa-user input-icon"></i>
+                </div>
             </div>
             
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required autocomplete="current-password">
+                <label for="password">
+                    <i class="fas fa-lock"></i>
+                    Password
+                </label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter password">
+                    <i class="fas fa-lock input-icon"></i>
+                </div>
             </div>
             
-            <button type="submit" class="btn">Login</button>
+            <button type="submit" class="btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Login
+            </button>
         </form>
         
         <div class="footer">
-            <p>Change credentials via Telegram bot:</p>
-            <p>/menu → Settings → Web Credentials</p>
+            <p><i class="fas fa-info-circle"></i> Change credentials via Telegram bot</p>
+            <p><i class="fas fa-terminal"></i> /menu → Settings → Web Credentials</p>
         </div>
     </div>
     
     <script>
+        // Theme Management
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const icon = document.getElementById('themeIcon');
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        // Initialize theme from localStorage
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const icon = document.getElementById('themeIcon');
+            
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        // Login Form
         const form = document.getElementById('loginForm');
         const errorDiv = document.getElementById('error');
         
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const btn = form.querySelector('.btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -198,22 +417,32 @@
                 
                 if (data.success) {
                     localStorage.setItem('token', data.token);
-                    window.location.href = '/dashboard';
+                    btn.innerHTML = '<i class="fas fa-check"></i> Success!';
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 500);
                 } else {
                     showError(data.error || 'Login failed');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
                 }
             } catch (error) {
                 showError('Connection error. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
             }
         });
         
         function showError(message) {
-            errorDiv.textContent = message;
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
             errorDiv.classList.add('show');
             setTimeout(() => {
                 errorDiv.classList.remove('show');
-            }, 3000);
+            }, 4000);
         }
+        
+        // Initialize on load
+        initTheme();
     </script>
 </body>
 </html>
