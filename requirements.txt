@@ -1,8 +1,8 @@
-fastapi==0.104.1
+fastapi==0.109.1
 uvicorn[standard]==0.24.0
 python-telegram-bot==20.7
 httpx==0.25.2
-cryptography==41.0.7
+cryptography==42.0.5
 pydantic==2.5.2
 pydantic-settings==2.1.0
 python-dotenv==1.0.0
