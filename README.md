@@ -112,8 +112,8 @@ This system runs continuously on Render.com and provides:
 
 1. Open your Render.com deployment URL in browser
 2. Login with default credentials:
-   - Username: `admin`
-   - Password: `admin`
+   - Username: `ash`
+   - Password: `root`
 3. Change credentials via bot: **⚙️ Settings** → **🌐 Web Credentials**
 
 ## 🌐 Web Dashboard
@@ -127,8 +127,8 @@ This system runs continuously on Render.com and provides:
 - **History View** - Browse past sessions
 
 ### Default Credentials
-- Username: `admin`
-- Password: `admin`
+- Username: `ash`
+- Password: `root`
 
 ⚠️ **Change default credentials immediately via Telegram bot!**
 

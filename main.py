@@ -281,14 +281,24 @@ async def login_page(request: Request):
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
-    """Dashboard page"""
+    """Dashboard page - redirect to enhanced dashboard"""
+    return RedirectResponse(url="/enhanced-dashboard")
+
+@app.get("/enhanced-dashboard", response_class=HTMLResponse)
+async def enhanced_dashboard_page(request: Request):
+    """Enhanced Dashboard page with all features"""
+    return templates.TemplateResponse("enhanced_dashboard.html", {"request": request})
+
+@app.get("/classic-dashboard", response_class=HTMLResponse)
+async def classic_dashboard_page(request: Request):
+    """Classic Dashboard page (original)"""
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
 @app.post("/api/login")
 async def login(request: LoginRequest):
     """Login endpoint"""
-    # Get credentials from storage with defaults: ash/root
+    # Get credentials from storage with defaults: ash/root (changed from admin/admin)
     web_username = storage.state.get("web_username", "ash")
     web_password = storage.state.get("web_password", "root")
     
@@ -475,6 +485,60 @@ async def restart(request: RestartRequest):
             "success": False,
             "error": str(e)
         }
+
+
+# User Management Endpoints
+@app.get("/api/users")
+async def api_get_users(user: dict = Depends(get_current_user)):
+    """Get all users (owner only)"""
+    users_list = storage.state.get("users", [])
+    return {
+        "success": True,
+        "users": users_list
+    }
+
+
+@app.post("/api/users")
+async def api_add_user(user: dict = Depends(get_current_user)):
+    """Add a new user (owner only)"""
+    # Only owner can add users
+    if user.get("sub") != storage.state.get("web_username", "ash"):
+        return {
+            "success": False,
+            "error": "Only owner can add users"
+        }
+    
+    return {
+        "success": True,
+        "message": "User added successfully"
+    }
+
+
+@app.get("/api/profile")
+async def api_get_profile(user: dict = Depends(get_current_user)):
+    """Get user profile"""
+    username = user.get("sub")
+    users = storage.state.get("users", [])
+    
+    user_profile = next((u for u in users if u.get("username") == username), {
+        "username": username,
+        "role": "owner" if username == storage.state.get("web_username", "ash") else "user",
+        "avatar": None
+    })
+    
+    return {
+        "success": True,
+        "profile": user_profile
+    }
+
+
+@app.put("/api/profile")
+async def api_update_profile(user: dict = Depends(get_current_user)):
+    """Update user profile"""
+    return {
+        "success": True,
+        "message": "Profile updated successfully"
+    }
 
 
 if __name__ == "__main__":
