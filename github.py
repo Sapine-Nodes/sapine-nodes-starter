@@ -7,6 +7,8 @@ import httpx
 from typing import Optional, Dict, List, Any
 import base64
 import time
+import zipfile
+import io
 
 
 class GitHubAPI:
@@ -197,7 +199,21 @@ class GitHubAPI:
                     follow_redirects=True
                 )
                 if response.status_code == 200:
-                    return response.text
+                    # GitHub returns logs as a ZIP file, extract and parse it
+                    try:
+                        zip_content = io.BytesIO(response.content)
+                        with zipfile.ZipFile(zip_content) as zip_file:
+                            log_text = []
+                            # Sort files to maintain order
+                            for file_name in sorted(zip_file.namelist()):
+                                if file_name.endswith('.txt'):
+                                    with zip_file.open(file_name) as log_file:
+                                        content = log_file.read().decode('utf-8', errors='replace')
+                                        log_text.append(f"=== {file_name} ===\n{content}\n")
+                            return "\n".join(log_text) if log_text else "No log files found in archive"
+                    except zipfile.BadZipFile:
+                        # If it's not a ZIP file, return as text (fallback)
+                        return response.text
                 return None
             except Exception as e:
                 print(f"Error getting workflow logs: {e}")
