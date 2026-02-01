@@ -605,7 +605,8 @@ class TelegramBot:
             await update.message.reply_text(
                 "✅ Web credentials updated!\n\n"
                 f"Username: `{username}`\n"
-                f"Password: `{password}`",
+                "Password: `{'*' * len(password)}`\n\n"
+                "⚠️ Keep your credentials secure!",
                 parse_mode=ParseMode.MARKDOWN
             )
         except Exception as e:

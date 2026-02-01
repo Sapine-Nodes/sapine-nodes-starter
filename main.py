@@ -22,7 +22,12 @@ from sshx import extract_sshx_url
 
 
 # JWT Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    import secrets
+    SECRET_KEY = secrets.token_urlsafe(32)
+    print(f"⚠️ WARNING: JWT_SECRET_KEY not set. Using generated key: {SECRET_KEY}")
+    print("⚠️ Set JWT_SECRET_KEY environment variable for production!")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 
@@ -287,8 +292,13 @@ async def login(request: LoginRequest):
     web_username = storage.state.get("web_username", "admin")
     web_password = storage.state.get("web_password", "admin")
     
+    # Use constant-time comparison to prevent timing attacks
+    import hmac
+    username_match = hmac.compare_digest(request.username, web_username)
+    password_match = hmac.compare_digest(request.password, web_password)
+    
     # Verify credentials
-    if request.username == web_username and request.password == web_password:
+    if username_match and password_match:
         # Create access token
         access_token = create_access_token(
             data={"sub": request.username},
