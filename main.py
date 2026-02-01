@@ -288,9 +288,9 @@ async def dashboard_page(request: Request):
 @app.post("/api/login")
 async def login(request: LoginRequest):
     """Login endpoint"""
-    # Get credentials from storage
-    web_username = storage.state.get("web_username", "admin")
-    web_password = storage.state.get("web_password", "admin")
+    # Get credentials from storage with defaults: ash/root
+    web_username = storage.state.get("web_username", "ash")
+    web_password = storage.state.get("web_password", "root")
     
     # Use constant-time comparison to prevent timing attacks
     import hmac
