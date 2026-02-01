@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - GitHub VM Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --sidebar-width: 260px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-right: 1px solid #334155;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .sidebar-header {
+            padding: 20px 0;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-section {
+            margin-bottom: 30px;
+        }
+        
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 10px;
+            padding: 0 10px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            color: #94a3b8;
+        }
+        
+        .nav-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #f1f5f9;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+        }
+        
+        .nav-item i {
+            font-size: 16px;
+            width: 20px;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        
+        .topbar {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid #334155;
+        }
+        
+        .btn-secondary:hover {
+            background: #334155;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .card-title i {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #475569;
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+        
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+        
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .badge-info {
+            background: rgba(6, 182, 212, 0.15);
+            color: #06b6d4;
+            border: 1px solid #06b6d4;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            min-height: 200px;
+            resize: vertical;
+        }
+        
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+        
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .alert-info {
+            background: rgba(6, 182, 212, 0.15);
+            color: #06b6d4;
+            border: 1px solid #06b6d4;
+        }
+        
+        .list-item {
+            padding: 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-item:hover {
+            border-color: #3b82f6;
+        }
+        
+        .code-block {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+        
+        .spinner {
+            border: 3px solid #334155;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #f1f5f9;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>
+                <i class="fas fa-server"></i>
+                VM Manager
+            </h1>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">Dashboard</div>
+            <div class="nav-item active" onclick="showSection('overview')">
+                <i class="fas fa-chart-line"></i>
+                <span>Overview</span>
+            </div>
+            <div class="nav-item" onclick="showSection('workflows')">
+                <i class="fas fa-play-circle"></i>
+                <span>Workflows</span>
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">Management</div>
+            <div class="nav-item" onclick="showSection('github')">
+                <i class="fab fa-github"></i>
+                <span>GitHub Accounts</span>
+            </div>
+            <div class="nav-item" onclick="showSection('repositories')">
+                <i class="fas fa-code-branch"></i>
+                <span>Repositories</span>
+            </div>
+            <div class="nav-item" onclick="showSection('workflow-files')">
+                <i class="fas fa-file-code"></i>
+                <span>Workflow Files</span>
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">Access</div>
+            <div class="nav-item" onclick="showSection('ssh')">
+                <i class="fas fa-terminal"></i>
+                <span>SSH Access</span>
+            </div>
+            <div class="nav-item" onclick="showSection('history')">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">System</div>
+            <div class="nav-item" onclick="showSection('settings')">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 style="font-size: 24px; font-weight: 700; margin: 0;">
+                    <span id="pageTitle">Dashboard Overview</span>
+                </h2>
+            </div>
+            <div class="topbar-right">
+                <button class="btn btn-secondary" onclick="refreshAll()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+                <button class="btn btn-primary" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Alerts Container -->
+        <div id="alerts"></div>
+        
+        <!-- Overview Section -->
+        <div id="overview" class="section active">
+            <div class="grid">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="fas fa-server"></i>
+                        VM Status
+                    </div>
+                    <div class="stat-value" id="vmStatus">Loading...</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="fas fa-clock"></i>
+                        Uptime
+                    </div>
+                    <div class="stat-value" id="uptime">Loading...</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="fas fa-redo"></i>
+                        Total Restarts
+                    </div>
+                    <div class="stat-value" id="restarts">Loading...</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        System Information
+                    </div>
+                </div>
+                <div id="systemInfo">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading system information...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-success" onclick="startWorkflow()">
+                        <i class="fas fa-play"></i>
+                        Start Workflow
+                    </button>
+                    <button class="btn btn-danger" onclick="stopWorkflow()">
+                        <i class="fas fa-stop"></i>
+                        Stop Workflow
+                    </button>
+                    <button class="btn btn-warning" onclick="restartWorkflow()">
+                        <i class="fas fa-redo"></i>
+                        Restart Workflow
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Workflows Section -->
+        <div id="workflows" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-play-circle"></i>
+                        Recent Workflow Runs
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadWorkflowRuns()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+                <div id="workflowRuns">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading workflow runs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GitHub Accounts Section -->
+        <div id="github" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fab fa-github"></i>
+                        GitHub Accounts
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Add GitHub Personal Access Token</label>
+                    <input type="password" id="githubToken" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                </div>
+                
+                <button class="btn btn-primary" onclick="addGitHubToken()">
+                    <i class="fas fa-plus"></i>
+                    Add Token
+                </button>
+                
+                <div style="margin-top: 32px;">
+                    <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
+                        Your Accounts
+                    </h3>
+                    <div id="githubAccounts">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading accounts...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Repositories Section -->
+        <div id="repositories" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-code-branch"></i>
+                        Repositories
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadRepositories()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
+                        Create New Repository
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label">Repository Name</label>
+                        <input type="text" id="repoName" class="form-input" placeholder="my-vm-repo">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" id="repoDescription" class="form-input" placeholder="GitHub Actions VM Manager" value="GitHub Actions VM Manager">
+                    </div>
+                    <button class="btn btn-primary" onclick="createRepository()">
+                        <i class="fas fa-plus"></i>
+                        Create Repository
+                    </button>
+                </div>
+                
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
+                        Your Repositories
+                    </h3>
+                    <div id="repositoryList">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading repositories...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Workflow Files Section -->
+        <div id="workflow-files" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-file-code"></i>
+                        Workflow Files
+                    </div>
+                    <button class="btn btn-primary" onclick="syncWorkflowToGitHub()">
+                        <i class="fas fa-upload"></i>
+                        Sync to GitHub
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Select Workflow File</label>
+                    <select id="workflowFileSelect" class="form-select" onchange="loadWorkflowFileContent()">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Workflow Content (Read-Only)</label>
+                    <textarea id="workflowContent" class="form-textarea" readonly></textarea>
+                </div>
+                
+                <p style="color: #94a3b8; font-size: 14px; margin-top: 16px;">
+                    <i class="fas fa-info-circle"></i>
+                    Edit workflow files directly in the /workflows directory. Changes will be reflected here.
+                </p>
+            </div>
+        </div>
+        
+        <!-- SSH Access Section -->
+        <div id="ssh" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-terminal"></i>
+                        SSH Access
+                    </div>
+                </div>
+                <div id="sshInfo">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading SSH information...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Section -->
+        <div id="history" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-history"></i>
+                        SSHX History
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadHistory()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+                <div id="historyList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading history...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Section -->
+        <div id="settings" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 32px;">
+                    <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
+                        Web Dashboard Credentials
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" id="currentPassword" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Username (optional)</label>
+                        <input type="text" id="newUsername" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password (optional)</label>
+                        <input type="password" id="newPassword" class="form-input">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateCredentials()">
+                        <i class="fas fa-save"></i>
+                        Update Credentials
+                    </button>
+                </div>
+                
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
+                        Current Configuration
+                    </h3>
+                    <div id="currentSettings">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading settings...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+        
+        // API helper
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            const response = await fetch(endpoint, options);
+            
+            if (response.status === 401) {
+                logout();
+                return null;
+            }
+            
+            return await response.json();
+        }
+        
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Set active nav item
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // Update page title
+            const titles = {
+                'overview': 'Dashboard Overview',
+                'workflows': 'Workflow Runs',
+                'github': 'GitHub Accounts',
+                'repositories': 'Repositories',
+                'workflow-files': 'Workflow Files',
+                'ssh': 'SSH Access',
+                'history': 'SSHX History',
+                'settings': 'Settings'
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[sectionId] || 'Dashboard';
+            
+            // Load section data
+            switch(sectionId) {
+                case 'overview':
+                    loadOverview();
+                    break;
+                case 'workflows':
+                    loadWorkflowRuns();
+                    break;
+                case 'github':
+                    loadGitHubAccounts();
+                    break;
+                case 'repositories':
+                    loadRepositories();
+                    break;
+                case 'workflow-files':
+                    loadWorkflowFiles();
+                    break;
+                case 'ssh':
+                    loadSSHInfo();
+                    break;
+                case 'history':
+                    loadHistory();
+                    break;
+                case 'settings':
+                    loadSettings();
+                    break;
+            }
+            
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('visible');
+            }
+        }
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('visible');
+        }
+        
+        // Alert system
+        function showAlert(message, type = 'info') {
+            const alerts = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i><span>${message}</span>`;
+            
+            alerts.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 5000);
+        }
+        
+        // Overview Section
+        async function loadOverview() {
+            try {
+                const data = await apiCall('/status');
+                
+                if (data) {
+                    // Update stat cards
+                    document.getElementById('vmStatus').innerHTML = '<span class="badge badge-success"><i class="fas fa-circle"></i> Running</span>';
+                    document.getElementById('uptime').textContent = formatUptime(data.uptime_seconds);
+                    document.getElementById('restarts').textContent = data.restart_info.total_restarts;
+                    
+                    // Update system info
+                    document.getElementById('systemInfo').innerHTML = `
+                        <div style="display: grid; gap: 16px;">
+                            <div class="list-item">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">GitHub Account</div>
+                                    <div style="color: #94a3b8; font-size: 14px;">${data.account || 'Not configured'}</div>
+                                </div>
+                            </div>
+                            <div class="list-item">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">Active Repository</div>
+                                    <div style="color: #94a3b8; font-size: 14px;">${data.repository || 'Not configured'}</div>
+                                </div>
+                            </div>
+                            <div class="list-item">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">Last Restart</div>
+                                    <div style="color: #94a3b8; font-size: 14px;">${data.restart_info.last_restart_reason || 'Never'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                showAlert('Error loading overview', 'error');
+            }
+        }
+        
+        // Workflow Actions
+        async function startWorkflow() {
+            if (!confirm('Start a new workflow?')) return;
+            
+            try {
+                showAlert('Starting workflow...', 'info');
+                const data = await apiCall('/api/workflow/start', 'POST');
+                if (data && data.success) {
+                    showAlert('Workflow started successfully!', 'success');
+                    setTimeout(loadOverview, 2000);
+                } else {
+                    showAlert(data.error || 'Failed to start workflow', 'error');
+                }
+            } catch (error) {
+                showAlert('Error starting workflow', 'error');
+            }
+        }
+        
+        async function stopWorkflow() {
+            if (!confirm('Stop all running workflows?')) return;
+            
+            try {
+                showAlert('Stopping workflow...', 'info');
+                const data = await apiCall('/api/workflow/stop', 'POST');
+                if (data && data.success) {
+                    showAlert('Workflow stopped successfully!', 'success');
+                    setTimeout(loadOverview, 2000);
+                } else {
+                    showAlert(data.error || 'Failed to stop workflow', 'error');
+                }
+            } catch (error) {
+                showAlert('Error stopping workflow', 'error');
+            }
+        }
+        
+        async function restartWorkflow() {
+            if (!confirm('Restart workflow? This will stop current workflow and start a new one.')) return;
+            
+            try {
+                showAlert('Restarting workflow...', 'info');
+                const response = await fetch('/restart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: 'Manual restart from web dashboard' })
+                });
+                
+                const data = await response.json();
+                if (data && data.success) {
+                    showAlert('Workflow restarted successfully!', 'success');
+                    setTimeout(loadOverview, 2000);
+                } else {
+                    showAlert(data.error || 'Failed to restart workflow', 'error');
+                }
+            } catch (error) {
+                showAlert('Error restarting workflow', 'error');
+            }
+        }
+        
+        // Workflow Runs
+        async function loadWorkflowRuns() {
+            try {
+                const data = await apiCall('/api/runs');
+                
+                if (data && data.success && data.runs && data.runs.length > 0) {
+                    const html = data.runs.map(run => {
+                        const statusColor = run.status === 'completed' ? 
+                            (run.conclusion === 'success' ? 'success' : 'danger') : 
+                            (run.status === 'in_progress' ? 'info' : 'warning');
+                        
+                        return `
+                            <div class="list-item">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">
+                                        Run #${run.run_number || run.id}
+                                    </div>
+                                    <div style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">
+                                        ${run.name || 'Workflow'} • ${new Date(run.created_at).toLocaleString()}
+                                    </div>
+                                    <span class="badge badge-${statusColor}">
+                                        ${run.status === 'completed' ? run.conclusion : run.status}
+                                    </span>
+                                </div>
+                                <button class="btn btn-secondary" onclick="viewRunLogs(${run.id})">
+                                    <i class="fas fa-file-alt"></i>
+                                    View Logs
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    document.getElementById('workflowRuns').innerHTML = html;
+                } else {
+                    document.getElementById('workflowRuns').innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 40px;">No workflow runs found</p>';
+                }
+            } catch (error) {
+                document.getElementById('workflowRuns').innerHTML = '<p style="color: #ef4444; text-align: center; padding: 40px;">Error loading workflow runs</p>';
+            }
+        }
+        
+        async function viewRunLogs(runId) {
+            try {
+                showAlert('Loading logs...', 'info');
+                const data = await apiCall(`/api/runs/${runId}/logs`);
+                
+                if (data && data.success) {
+                    const logsHtml = `
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-file-alt"></i>
+                                    Workflow Run #${runId} Logs
+                                </div>
+                                <button class="btn btn-secondary" onclick="loadWorkflowRuns()">
+                                    <i class="fas fa-times"></i>
+                                    Close
+                                </button>
+                            </div>
+                            <div class="code-block">${data.logs.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('workflowRuns').innerHTML = logsHtml;
+                } else {
+                    showAlert(data.error || 'Failed to load logs', 'error');
+                }
+            } catch (error) {
+                showAlert('Error loading logs', 'error');
+            }
+        }
+        
+        // GitHub Accounts
+        async function loadGitHubAccounts() {
+            try {
+                const data = await apiCall('/api/github/accounts');
+                
+                if (data && data.success) {
+                    if (data.accounts.length > 0) {
+                        const html = data.accounts.map(account => `
+                            <div class="list-item">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">
+                                        <i class="fab fa-github"></i>
+                                        ${account}
+                                    </div>
+                                    ${account === data.active_account ? '<span class="badge badge-success">Active</span>' : ''}
+                                </div>
+                                ${account !== data.active_account ? `
+                                    <button class="btn btn-secondary" onclick="switchGitHubAccount('${account}')">
+                                        <i class="fas fa-exchange-alt"></i>
+                                        Switch
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `).join('');
+                        
+                        document.getElementById('githubAccounts').innerHTML = html;
+                    } else {
+                        document.getElementById('githubAccounts').innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 40px;">No GitHub accounts added yet</p>';
+                    }
+                }
+            } catch (error) {
+                showAlert('Error loading GitHub accounts', 'error');
+            }
+        }
+        
+        async function addGitHubToken() {
+            const tokenInput = document.getElementById('githubToken');
+            const token = tokenInput.value.trim();
+            
+            if (!token) {
+                showAlert('Please enter a GitHub token', 'error');
+                return;
+            }
+            
+            try {
+                showAlert('Validating token...', 'info');
+                const data = await apiCall('/api/github/token', 'POST', { token });
+                
+                if (data && data.success) {
+                    showAlert(`Token added for ${data.username}!`, 'success');
+                    tokenInput.value = '';
+                    loadGitHubAccounts();
+                } else {
+                    showAlert(data.error || 'Invalid token', 'error');
+                }
+            } catch (error) {
+                showAlert('Error adding token', 'error');
+            }
+        }
+        
+        async function switchGitHubAccount(username) {
+            try {
+                const data = await apiCall('/api/github/switch', 'POST', { username });
+                
+                if (data && data.success) {
+                    showAlert(data.message, 'success');
+                    loadGitHubAccounts();
+                    loadOverview();
+                } else {
+                    showAlert(data.error || 'Failed to switch account', 'error');
+                }
+            } catch (error) {
+                showAlert('Error switching account', 'error');
+            }
+        }
+        
+        // Repositories
+        async function loadRepositories() {
+            try {
+                const data = await apiCall('/api/repos');
+                
+                if (data && data.success) {
+                    if (data.repositories.length > 0) {
+                        const html = data.repositories.map(repo => `
+                            <div class="list-item">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">
+                                        <i class="fas fa-code-branch"></i>
+                                        ${repo.full_name}
+                                    </div>
+                                    ${repo.full_name === data.active_repo ? '<span class="badge badge-success">Active</span>' : ''}
+                                </div>
+                                ${repo.full_name !== data.active_repo ? `
+                                    <button class="btn btn-secondary" onclick="selectRepository('${repo.full_name}')">
+                                        <i class="fas fa-check"></i>
+                                        Select
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `).join('');
+                        
+                        document.getElementById('repositoryList').innerHTML = html;
+                    } else {
+                        document.getElementById('repositoryList').innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 40px;">No repositories found</p>';
+                    }
+                } else {
+                    document.getElementById('repositoryList').innerHTML = `<p style="color: #ef4444; text-align: center; padding: 40px;">${data.error || 'Error loading repositories'}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('repositoryList').innerHTML = '<p style="color: #ef4444; text-align: center; padding: 40px;">Error loading repositories</p>';
+            }
+        }
+        
+        async function createRepository() {
+            const nameInput = document.getElementById('repoName');
+            const descInput = document.getElementById('repoDescription');
+            const name = nameInput.value.trim();
+            const description = descInput.value.trim();
+            
+            if (!name) {
+                showAlert('Please enter a repository name', 'error');
+                return;
+            }
+            
+            try {
+                showAlert('Creating repository...', 'info');
+                const data = await apiCall('/api/repos/create', 'POST', { name, description });
+                
+                if (data && data.success) {
+                    showAlert(`Repository ${data.repo_name} created!`, 'success');
+                    nameInput.value = '';
+                    loadRepositories();
+                } else {
+                    showAlert(data.error || 'Failed to create repository', 'error');
+                }
+            } catch (error) {
+                showAlert('Error creating repository', 'error');
+            }
+        }
+        
+        async function selectRepository(repo) {
+            try {
+                const data = await apiCall('/api/repos/select', 'POST', { repo });
+                
+                if (data && data.success) {
+                    showAlert(data.message, 'success');
+                    loadRepositories();
+                    loadOverview();
+                } else {
+                    showAlert(data.error || 'Failed to select repository', 'error');
+                }
+            } catch (error) {
+                showAlert('Error selecting repository', 'error');
+            }
+        }
+        
+        // Workflow Files
+        async function loadWorkflowFiles() {
+            try {
+                const data = await apiCall('/api/workflows/files');
+                
+                if (data && data.success) {
+                    const select = document.getElementById('workflowFileSelect');
+                    
+                    if (data.files.length > 0) {
+                        select.innerHTML = data.files.map(file => 
+                            `<option value="${file}">${file}</option>`
+                        ).join('');
+                        
+                        loadWorkflowFileContent();
+                    } else {
+                        select.innerHTML = '<option value="">No workflow files found</option>';
+                        document.getElementById('workflowContent').value = '';
+                    }
+                }
+            } catch (error) {
+                showAlert('Error loading workflow files', 'error');
+            }
+        }
+        
+        async function loadWorkflowFileContent() {
+            const select = document.getElementById('workflowFileSelect');
+            const filename = select.value;
+            
+            if (!filename) return;
+            
+            try {
+                const data = await apiCall(`/api/workflows/content/${filename}`);
+                
+                if (data && data.success) {
+                    document.getElementById('workflowContent').value = data.content;
+                } else {
+                    showAlert(data.error || 'Failed to load workflow content', 'error');
+                }
+            } catch (error) {
+                showAlert('Error loading workflow content', 'error');
+            }
+        }
+        
+        async function syncWorkflowToGitHub() {
+            const select = document.getElementById('workflowFileSelect');
+            const filename = select.value;
+            
+            if (!filename) {
+                showAlert('Please select a workflow file', 'error');
+                return;
+            }
+            
+            if (!confirm(`Sync ${filename} to GitHub?`)) return;
+            
+            try {
+                showAlert('Syncing workflow to GitHub...', 'info');
+                const data = await apiCall('/api/workflows/sync', 'POST', { filename });
+                
+                if (data && data.success) {
+                    showAlert(data.message, 'success');
+                } else {
+                    showAlert(data.error || 'Failed to sync workflow', 'error');
+                }
+            } catch (error) {
+                showAlert('Error syncing workflow', 'error');
+            }
+        }
+        
+        // SSH Access
+        async function loadSSHInfo() {
+            try {
+                const data = await apiCall('/status');
+                
+                if (data) {
+                    const html = data.sshx_url 
+                        ? `
+                            <p style="color: #94a3b8; margin-bottom: 16px;">
+                                <i class="fas fa-link"></i> Current SSHX URL:
+                            </p>
+                            <div class="code-block" style="margin-bottom: 16px;">
+                                <a href="${data.sshx_url}" target="_blank" style="color: #3b82f6; text-decoration: none;">${data.sshx_url}</a>
+                            </div>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <button class="btn btn-primary" onclick="copyToClipboard('${data.sshx_url}')">
+                                    <i class="fas fa-copy"></i>
+                                    Copy URL
+                                </button>
+                                <a href="${data.sshx_url}" target="_blank" class="btn btn-success">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    Open SSHX
+                                </a>
+                            </div>
+                        `
+                        : `
+                            <p style="color: #94a3b8; text-align: center; padding: 40px;">
+                                <i class="fas fa-info-circle"></i>
+                                No SSHX URL available. Start a workflow to get SSH access.
+                            </p>
+                        `;
+                    
+                    document.getElementById('sshInfo').innerHTML = html;
+                }
+            } catch (error) {
+                showAlert('Error loading SSH info', 'error');
+            }
+        }
+        
+        // History
+        async function loadHistory() {
+            try {
+                const data = await apiCall('/api/history');
+                
+                if (data && data.sshx_urls && data.sshx_urls.length > 0) {
+                    const html = data.sshx_urls.map(entry => `
+                        <div class="list-item">
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">
+                                    <i class="fas fa-terminal"></i>
+                                    SSHX Session
+                                </div>
+                                <div style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">
+                                    ${new Date(entry.timestamp).toLocaleString()}
+                                </div>
+                                <div class="code-block" style="font-size: 12px; padding: 8px 12px;">
+                                    ${entry.url}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('historyList').innerHTML = html;
+                } else {
+                    document.getElementById('historyList').innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 40px;">No history available yet</p>';
+                }
+            } catch (error) {
+                document.getElementById('historyList').innerHTML = '<p style="color: #ef4444; text-align: center; padding: 40px;">Error loading history</p>';
+            }
+        }
+        
+        // Settings
+        async function loadSettings() {
+            try {
+                const data = await apiCall('/api/settings');
+                
+                if (data && data.success) {
+                    const html = `
+                        <div class="list-item">
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">Web Username</div>
+                                <div style="color: #94a3b8; font-size: 14px;">${data.settings.web_username}</div>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">Active GitHub Account</div>
+                                <div style="color: #94a3b8; font-size: 14px;">${data.settings.active_account || 'Not set'}</div>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">Active Repository</div>
+                                <div style="color: #94a3b8; font-size: 14px;">${data.settings.active_repo || 'Not set'}</div>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">System Uptime</div>
+                                <div style="color: #94a3b8; font-size: 14px;">${formatUptime(data.settings.uptime_seconds)}</div>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">Total Restarts</div>
+                                <div style="color: #94a3b8; font-size: 14px;">${data.settings.total_restarts}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('currentSettings').innerHTML = html;
+                }
+            } catch (error) {
+                showAlert('Error loading settings', 'error');
+            }
+        }
+        
+        async function updateCredentials() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newUsername = document.getElementById('newUsername').value;
+            const newPassword = document.getElementById('newPassword').value;
+            
+            if (!currentPassword) {
+                showAlert('Please enter your current password', 'error');
+                return;
+            }
+            
+            if (!newUsername && !newPassword) {
+                showAlert('Please enter at least one new value', 'error');
+                return;
+            }
+            
+            try {
+                showAlert('Updating credentials...', 'info');
+                const data = await apiCall('/api/settings/credentials', 'POST', {
+                    current_password: currentPassword,
+                    new_username: newUsername || undefined,
+                    new_password: newPassword || undefined
+                });
+                
+                if (data && data.success) {
+                    showAlert(data.message, 'success');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    loadSettings();
+                } else {
+                    showAlert(data.error || 'Failed to update credentials', 'error');
+                }
+            } catch (error) {
+                showAlert('Error updating credentials', 'error');
+            }
+        }
+        
+        // Utility functions
+        function formatUptime(seconds) {
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            
+            if (days > 0) return `${days}d ${hours}h`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            return `${minutes}m`;
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('Copied to clipboard!', 'success');
+            }).catch(() => {
+                showAlert('Failed to copy', 'error');
+            });
+        }
+        
+        function refreshAll() {
+            const activeSection = document.querySelector('.section.active');
+            if (activeSection) {
+                const sectionId = activeSection.id;
+                showSection(sectionId);
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        
+        // Initialize
+        loadOverview();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            const activeSection = document.querySelector('.section.active');
+            if (activeSection && activeSection.id === 'overview') {
+                loadOverview();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

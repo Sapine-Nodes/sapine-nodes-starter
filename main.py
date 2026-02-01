@@ -17,7 +17,7 @@ import hashlib
 
 from storage import Storage
 from github import GitHubAPI
-from bot import TelegramBot
+from bot_notification import TelegramBot
 from sshx import extract_sshx_url
 
 
@@ -281,17 +281,22 @@ async def login_page(request: Request):
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
-    """Dashboard page - redirect to enhanced dashboard"""
-    return RedirectResponse(url="/enhanced-dashboard")
+    """Dashboard page - redirect to admin dashboard"""
+    return RedirectResponse(url="/admin")
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_dashboard_page(request: Request):
+    """Admin Dashboard page with complete control panel"""
+    return templates.TemplateResponse("admin_dashboard.html", {"request": request})
 
 @app.get("/enhanced-dashboard", response_class=HTMLResponse)
 async def enhanced_dashboard_page(request: Request):
-    """Enhanced Dashboard page with all features"""
+    """Enhanced Dashboard page (legacy)"""
     return templates.TemplateResponse("enhanced_dashboard.html", {"request": request})
 
 @app.get("/classic-dashboard", response_class=HTMLResponse)
 async def classic_dashboard_page(request: Request):
-    """Classic Dashboard page (original)"""
+    """Classic Dashboard page (legacy)"""
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
@@ -538,6 +543,387 @@ async def api_update_profile(user: dict = Depends(get_current_user)):
     return {
         "success": True,
         "message": "Profile updated successfully"
+    }
+
+
+# GitHub Token Management Endpoints
+class TokenRequest(BaseModel):
+    token: str
+
+
+@app.post("/api/github/token")
+async def api_add_github_token(request: TokenRequest, user: dict = Depends(get_current_user)):
+    """Add and validate GitHub token"""
+    try:
+        github = GitHubAPI(request.token)
+        valid, username = await github.validate_token()
+        
+        if valid and username:
+            storage.add_github_token(username, request.token)
+            return {
+                "success": True,
+                "username": username,
+                "message": f"GitHub token added for {username}"
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Invalid GitHub token"
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+@app.get("/api/github/accounts")
+async def api_list_github_accounts(user: dict = Depends(get_current_user)):
+    """List all GitHub accounts"""
+    accounts = list(storage.state.get("github_tokens", {}).keys())
+    active = storage.get_active_account()
+    
+    return {
+        "success": True,
+        "accounts": accounts,
+        "active_account": active
+    }
+
+
+class SwitchAccountRequest(BaseModel):
+    username: str
+
+
+@app.post("/api/github/switch")
+async def api_switch_github_account(request: SwitchAccountRequest, user: dict = Depends(get_current_user)):
+    """Switch active GitHub account"""
+    if request.username in storage.state.get("github_tokens", {}):
+        storage.set_active_account(request.username)
+        return {
+            "success": True,
+            "message": f"Switched to {request.username}"
+        }
+    else:
+        return {
+            "success": False,
+            "error": "Account not found"
+        }
+
+
+# Repository Management Endpoints
+@app.get("/api/repos")
+async def api_list_repos(user: dict = Depends(get_current_user)):
+    """List repositories for active account"""
+    token = storage.get_active_token()
+    username = storage.get_active_account()
+    
+    if not token or not username:
+        return {
+            "success": False,
+            "error": "No active GitHub account"
+        }
+    
+    try:
+        github = GitHubAPI(token)
+        repos = await github.list_repositories(username)
+        
+        return {
+            "success": True,
+            "repositories": [{"name": r["name"], "full_name": r["full_name"]} for r in repos],
+            "active_repo": storage.get_active_repo()
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+class CreateRepoRequest(BaseModel):
+    name: str
+    description: str = "GitHub Actions VM Manager"
+
+
+@app.post("/api/repos/create")
+async def api_create_repo(request: CreateRepoRequest, user: dict = Depends(get_current_user)):
+    """Create a new repository"""
+    token = storage.get_active_token()
+    
+    if not token:
+        return {
+            "success": False,
+            "error": "No active GitHub account"
+        }
+    
+    try:
+        github = GitHubAPI(token)
+        success, repo_name = await github.create_repository(request.name, request.description)
+        
+        if success:
+            return {
+                "success": True,
+                "repo_name": repo_name,
+                "message": f"Repository {repo_name} created"
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Failed to create repository"
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+class SelectRepoRequest(BaseModel):
+    repo: str
+
+
+@app.post("/api/repos/select")
+async def api_select_repo(request: SelectRepoRequest, user: dict = Depends(get_current_user)):
+    """Select active repository"""
+    token = storage.get_active_token()
+    
+    if not token:
+        return {
+            "success": False,
+            "error": "No active GitHub account"
+        }
+    
+    try:
+        github = GitHubAPI(token)
+        exists = await github.check_repository_exists(request.repo)
+        
+        if exists:
+            storage.set_active_repo(request.repo)
+            return {
+                "success": True,
+                "message": f"Selected repository {request.repo}"
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Repository not found"
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+# Workflow Management Endpoints
+@app.get("/api/workflows/files")
+async def api_list_workflow_files(user: dict = Depends(get_current_user)):
+    """List workflow files in /workflows directory"""
+    import os
+    import glob
+    
+    workflow_dir = "workflows"
+    if not os.path.exists(workflow_dir):
+        return {
+            "success": False,
+            "error": "Workflows directory not found"
+        }
+    
+    files = glob.glob(os.path.join(workflow_dir, "*.yml")) + glob.glob(os.path.join(workflow_dir, "*.yaml"))
+    
+    return {
+        "success": True,
+        "files": [os.path.basename(f) for f in files]
+    }
+
+
+@app.get("/api/workflows/content/{filename}")
+async def api_get_workflow_content(filename: str, user: dict = Depends(get_current_user)):
+    """Get content of a workflow file"""
+    import os
+    
+    filepath = os.path.join("workflows", filename)
+    
+    if not os.path.exists(filepath):
+        return {
+            "success": False,
+            "error": "Workflow file not found"
+        }
+    
+    try:
+        with open(filepath, 'r') as f:
+            content = f.read()
+        
+        return {
+            "success": True,
+            "content": content
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+class SyncWorkflowsRequest(BaseModel):
+    filename: str = "vm-worker.yml"
+
+
+@app.post("/api/workflows/sync")
+async def api_sync_workflows(request: SyncWorkflowsRequest, user: dict = Depends(get_current_user)):
+    """Sync workflow file to GitHub repository"""
+    token = storage.get_active_token()
+    repo = storage.get_active_repo()
+    
+    if not token or not repo:
+        return {
+            "success": False,
+            "error": "GitHub token or repository not configured"
+        }
+    
+    try:
+        import os
+        
+        filepath = os.path.join("workflows", request.filename)
+        
+        if not os.path.exists(filepath):
+            return {
+                "success": False,
+                "error": "Workflow file not found"
+            }
+        
+        with open(filepath, 'r') as f:
+            content = f.read()
+        
+        github = GitHubAPI(token)
+        success = await github.create_or_update_file(
+            repo,
+            f".github/workflows/{request.filename}",
+            content,
+            f"Update workflow: {request.filename}"
+        )
+        
+        if success:
+            return {
+                "success": True,
+                "message": f"Workflow {request.filename} synced to GitHub"
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Failed to sync workflow"
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+# Workflow Runs Endpoints
+@app.get("/api/runs")
+async def api_list_workflow_runs(user: dict = Depends(get_current_user)):
+    """List recent workflow runs"""
+    token = storage.get_active_token()
+    repo = storage.get_active_repo()
+    
+    if not token or not repo:
+        return {
+            "success": False,
+            "error": "GitHub token or repository not configured"
+        }
+    
+    try:
+        github = GitHubAPI(token)
+        runs = await github.list_workflow_runs(repo, per_page=10)
+        
+        return {
+            "success": True,
+            "runs": runs
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+@app.get("/api/runs/{run_id}/logs")
+async def api_get_run_logs(run_id: int, user: dict = Depends(get_current_user)):
+    """Get logs for a workflow run"""
+    token = storage.get_active_token()
+    repo = storage.get_active_repo()
+    
+    if not token or not repo:
+        return {
+            "success": False,
+            "error": "GitHub token or repository not configured"
+        }
+    
+    try:
+        github = GitHubAPI(token)
+        logs = await github.get_workflow_run_logs(repo, run_id)
+        
+        return {
+            "success": True,
+            "logs": logs or "No logs available"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+# Settings Endpoints
+class UpdateCredentialsRequest(BaseModel):
+    current_password: str
+    new_username: str = None
+    new_password: str = None
+
+
+@app.post("/api/settings/credentials")
+async def api_update_credentials(request: UpdateCredentialsRequest, user: dict = Depends(get_current_user)):
+    """Update web dashboard credentials"""
+    import hmac
+    
+    current_username = storage.state.get("web_username", "ash")
+    current_password = storage.state.get("web_password", "root")
+    
+    # Verify current password
+    if not hmac.compare_digest(request.current_password, current_password):
+        return {
+            "success": False,
+            "error": "Current password is incorrect"
+        }
+    
+    # Update username if provided
+    if request.new_username:
+        storage.state["web_username"] = request.new_username
+    
+    # Update password if provided
+    if request.new_password:
+        storage.state["web_password"] = request.new_password
+    
+    storage._save()
+    
+    return {
+        "success": True,
+        "message": "Credentials updated successfully"
+    }
+
+
+@app.get("/api/settings")
+async def api_get_settings(user: dict = Depends(get_current_user)):
+    """Get current settings"""
+    return {
+        "success": True,
+        "settings": {
+            "web_username": storage.state.get("web_username", "ash"),
+            "active_account": storage.get_active_account(),
+            "active_repo": storage.get_active_repo(),
+            "uptime_seconds": storage.get_uptime(),
+            "total_restarts": storage.state.get("total_restarts", 0)
+        }
     }
 
 
